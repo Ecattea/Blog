@@ -14,9 +14,6 @@ importers:
       '@resvg/resvg-js':
         specifier: ^2.6.2
         version: 2.6.2
-      '@tailwindcss/vite':
-        specifier: ^4.1.18
-        version: 4.1.18(vite@6.4.1(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.7.1))
       astro:
         specifier: ^5.16.6
         version: 5.16.6(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.41.1)(typescript@5.9.3)(yaml@2.7.1)
@@ -41,9 +38,6 @@ importers:
       slugify:
         specifier: ^1.6.6
         version: 1.6.6
-      tailwindcss:
-        specifier: ^4.1.18
-        version: 4.1.18
     devDependencies:
       '@astrojs/check':
         specifier: ^0.9.6
@@ -54,9 +48,6 @@ importers:
       '@shikijs/transformers':
         specifier: ^3.20.0
         version: 3.20.0
-      '@tailwindcss/typography':
-        specifier: ^0.5.19
-        version: 0.5.19(tailwindcss@4.1.18)
       '@types/lodash.kebabcase':
         specifier: ^4.1.9
         version: 4.1.9
@@ -81,9 +72,6 @@ importers:
       prettier-plugin-astro:
         specifier: ^0.14.1
         version: 0.14.1
-      prettier-plugin-tailwindcss:
-        specifier: ^0.7.2
-        version: 0.7.2(prettier-plugin-astro@0.14.1)(prettier@3.7.4)
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
