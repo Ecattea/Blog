@@ -2,9 +2,10 @@
   "name": "blog",
   "type": "module",
   "version": "5.5.1",
+  "packageManager": "pnpm@10.29.3",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && pagefind --site dist && node -e \"const fs=require('fs'); const path=require('path'); const from=path.join('dist','pagefind'); const to=path.join('public','pagefind'); if(!fs.existsSync(from)){console.warn('[copy-pagefind] Skip: '+from+' not found.'); process.exit(0);} fs.mkdirSync('public',{recursive:true}); fs.rmSync(to,{recursive:true,force:true}); fs.cpSync(from,to,{recursive:true}); console.log('[copy-pagefind] Copied '+from+' -> '+to);\"",
+    "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",
@@ -38,5 +39,11 @@
     "prettier-plugin-astro": "^0.14.1",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "sharp"
+    ]
   }
 }

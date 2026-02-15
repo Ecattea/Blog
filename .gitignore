@@ -25,6 +25,3 @@ pnpm-debug.log*
 
 # Secrets / local tooling
 .codex/
-
-# pagefind
-public/pagefind

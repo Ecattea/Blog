@@ -25,18 +25,19 @@ import { SITE } from "@/config";
     const onIdle = window.requestIdleCallback || (cb => setTimeout(cb, 1));
 
     onIdle(async () => {
-      // @ts-expect-error — Missing types for @pagefind/default-ui package.
-      const { PagefindUI } = await import("@pagefind/default-ui");
-
-      // Display warning inn dev mode
       if (import.meta.env.DEV) {
         pageFindSearch.innerHTML = `
             <div style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.6);">
-              <p class="font-ui" style="color: var(--text-secondary);"><strong>DEV mode:</strong> build once to generate the search index.</p>
+              <p class="font-ui" style="color: var(--text-secondary);"><strong>DEV mode:</strong> Pagefind index is generated during build. Use preview to test search.</p>
               <code style="display:block; margin-top:0.75rem;">pnpm run build</code>
+              <code style="display:block; margin-top:0.5rem;">pnpm run preview</code>
             </div>
           `;
+        return;
       }
+
+      // @ts-expect-error — Missing types for @pagefind/default-ui package.
+      const { PagefindUI } = await import("@pagefind/default-ui");
 
       // Init pagefind ui
       const search = new PagefindUI({
