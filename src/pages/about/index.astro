@@ -1,0 +1,64 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { SITE } from "@/config";
+import { SOCIALS } from "@/constants";
+---
+
+<Layout title={`About | ${SITE.title}`} description={SITE.desc}>
+  <section id="about">
+    <div class="about-layout">
+      <div class="profile-sticky">
+        <div class="profile-name font-display">{SITE.author}.</div>
+        <div class="profile-role font-ui">
+          Builder &amp; minimalist <br />writing in public
+        </div>
+
+        <div style="margin-top: 2rem;">
+          {SOCIALS.map(({ name, href }) => (
+            <a
+              class="social-link font-ui"
+              href={href}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {name} <span aria-hidden="true">↗</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <div class="about-content">
+        <p class="font-body">
+          I build digital products that focus on clarity and purpose. This site
+          is my place to think aloud—about design engineering, software
+          architecture, and the craft of writing.
+        </p>
+
+        <figure>
+          <img
+            src="https://images.unsplash.com/photo-1497215728101-856f4ea42174?q=80&w=1000&auto=format&fit=crop"
+            alt="Minimal workspace"
+            class="image-awakening"
+            loading="lazy"
+          />
+          <figcaption class="font-ui">Fig 1. A calm place to work.</figcaption>
+        </figure>
+
+        <p class="font-body">
+          Currently, I&apos;m exploring the idea of calm technology—software that
+          informs but doesn&apos;t demand attention.
+        </p>
+
+        <div
+          style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-subtle);"
+        >
+          <p class="font-ui" style="font-size: 0.85rem; color: var(--text-secondary);">
+            Built with Astro.<br />
+            Type set in Playfair Display &amp; Source Serif 4.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Layout>
+

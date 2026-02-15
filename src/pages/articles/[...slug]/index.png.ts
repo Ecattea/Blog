@@ -32,3 +32,4 @@ export const GET: APIRoute = async ({ props }) => {
     headers: { "Content-Type": "image/png" },
   });
 };
+

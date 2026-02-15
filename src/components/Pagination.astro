@@ -1,9 +1,6 @@
 ---
 import type { Page } from "astro";
 import type { CollectionEntry } from "astro:content";
-import IconArrowLeft from "@/assets/icons/IconArrowLeft.svg";
-import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
-import LinkButton from "./LinkButton.astro";
 
 type Props = {
   page: Page<CollectionEntry<"blog">>;
@@ -14,30 +11,30 @@ const { page } = Astro.props;
 
 {
   page.lastPage > 1 && (
-    <nav
-      class="mt-auto mb-8 flex justify-center"
-      role="navigation"
-      aria-label="Pagination Navigation"
-    >
-      <LinkButton
-        disabled={!page.url.prev}
-        href={page.url.prev as string}
-        class:list={["me-4 select-none", { "opacity-50": !page.url.prev }]}
-        aria-label="Goto Previous Page"
-      >
-        <IconArrowLeft class="inline-block rtl:rotate-180" />
-        Prev
-      </LinkButton>
-      {page.currentPage} / {page.lastPage}
-      <LinkButton
-        disabled={!page.url.next}
-        href={page.url.next as string}
-        class:list={["ms-4 select-none", { "opacity-50": !page.url.next }]}
-        aria-label="Goto Next Page"
-      >
-        Next
-        <IconArrowRight class="inline-block rtl:rotate-180" />
-      </LinkButton>
+    <nav class="pagination font-ui" aria-label="Pagination Navigation">
+      {page.url.prev ? (
+        <a class="pagination-link" href={page.url.prev as string}>
+          <span aria-hidden="true">←</span> Prev
+        </a>
+      ) : (
+        <span class="pagination-link" aria-disabled="true">
+          <span aria-hidden="true">←</span> Prev
+        </span>
+      )}
+
+      <span aria-label="Page status">
+        {page.currentPage} / {page.lastPage}
+      </span>
+
+      {page.url.next ? (
+        <a class="pagination-link" href={page.url.next as string}>
+          Next <span aria-hidden="true">→</span>
+        </a>
+      ) : (
+        <span class="pagination-link" aria-disabled="true">
+          Next <span aria-hidden="true">→</span>
+        </span>
+      )}
     </nav>
   )
 }

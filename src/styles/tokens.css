@@ -1,0 +1,39 @@
+/* Design tokens (from demo.html) */
+:root {
+  /* Palette: Warm Stone Theme */
+  --bg-canvas: #fafaf9; /* Warm Paper */
+  --bg-card: rgba(255, 255, 255, 0.5); /* Glassy Card Base */
+  --bg-card-hover: #ffffff; /* Solid White on Hover */
+
+  --text-primary: #1c1917; /* Warm Charcoal */
+  --text-secondary: #57534e; /* Warm Grey */
+  --text-body: #292524; /* Deep Grey for reading */
+
+  --accent-color: #2563eb; /* Electric Blue */
+
+  --border-subtle: rgba(231, 229, 228, 0.6);
+  --border-focus: rgba(231, 229, 228, 1);
+
+  --dock-glass: rgba(250, 250, 249, 0.85);
+  --dock-border: rgba(231, 229, 228, 0.9);
+
+  /* Spacing & Layout */
+  --page-width: 1400px;
+  --article-width: 840px; /* Optimized for readability */
+
+  /* Transitions */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-elastic: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Utility Classes for Fonts */
+.font-ui {
+  font-family: "Inter", sans-serif;
+}
+.font-display {
+  font-family: "Playfair Display", serif;
+}
+.font-body {
+  font-family: "Source Serif 4", serif;
+}
+

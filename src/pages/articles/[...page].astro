@@ -1,11 +1,8 @@
 ---
 import type { GetStaticPaths } from "astro";
 import { getCollection } from "astro:content";
-import Main from "@/layouts/Main.astro";
 import Layout from "@/layouts/Layout.astro";
-import Header from "@/components/Header.astro";
-import Footer from "@/components/Footer.astro";
-import Card from "@/components/Card.astro";
+import ArticleCard from "@/components/ArticleCard.astro";
 import Pagination from "@/components/Pagination.astro";
 import getSortedPosts from "@/utils/getSortedPosts";
 import { SITE } from "@/config";
@@ -18,15 +15,20 @@ export const getStaticPaths = (async ({ paginate }) => {
 const { page } = Astro.props;
 ---
 
-<Layout title={`Posts | ${SITE.title}`}>
-  <Header />
-  <Main pageTitle="Posts" pageDesc="All the articles I've posted.">
-    <ul>
-      {page.data.map(data => <Card {...data} />)}
-    </ul>
-  </Main>
+<Layout title={`Articles | ${SITE.title}`} description={SITE.desc}>
+  <section id="articles">
+    <div class="archive-container">
+      <div class="archive-header font-ui">Archive</div>
+      <div class="archive-subnav font-ui" aria-label="Secondary">
+        <a href="/tags/">Tags</a>
+        <a href="/search/">Search</a>
+        <a href="/archives/">Archives</a>
+      </div>
 
-  <Pagination {page} />
+      {page.data.map(post => <ArticleCard post={post} />)}
 
-  <Footer noMarginTop={page.lastPage > 1} />
+      <Pagination {page} />
+    </div>
+  </section>
 </Layout>
+

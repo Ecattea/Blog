@@ -1,0 +1,74 @@
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import dayjs from "dayjs";
+import Layout from "@/layouts/Layout.astro";
+import { getPath } from "@/utils/getPath";
+import { SITE } from "@/config";
+
+type Props = {
+  post: CollectionEntry<"blog">;
+};
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog", ({ data }) => !data.draft);
+  return posts.map(post => ({
+    params: { slug: getPath(post.id, post.filePath, false) },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+
+const {
+  title,
+  author,
+  description,
+  ogImage: initOgImage,
+  canonicalURL,
+  pubDatetime,
+  modDatetime,
+} = post.data;
+
+let ogImageUrl: string | undefined;
+if (typeof initOgImage === "string") {
+  ogImageUrl = initOgImage;
+} else if (initOgImage?.src) {
+  ogImageUrl = initOgImage.src;
+}
+
+if (!ogImageUrl && SITE.dynamicOgImage) {
+  ogImageUrl = `${getPath(post.id, post.filePath)}/index.png`;
+}
+
+const layoutProps = {
+  title: `${title} | ${SITE.title}`,
+  author,
+  description,
+  canonicalURL,
+  pubDatetime,
+  modDatetime,
+  ogImage: ogImageUrl,
+  scrollSmooth: true,
+};
+
+const dateLabel = dayjs(modDatetime ?? pubDatetime).format("MMM DD, YYYY");
+---
+
+<Layout {...layoutProps}>
+  <section id="post">
+    <div class="post-container">
+      <h1 class="post-title font-display">{title}</h1>
+      <div class="post-meta font-ui">
+        <a href="/articles/">Archive</a>
+        <span aria-hidden="true">•</span>
+        <span>{dateLabel}</span>
+      </div>
+
+      <article class="post-content font-body" data-pagefind-body>
+        <Content />
+      </article>
+    </div>
+  </section>
+</Layout>
+

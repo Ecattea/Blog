@@ -1,0 +1,33 @@
+---
+const rawPathname = Astro.url.pathname;
+const pathname = rawPathname.replace(/\/+$/, "") || "/";
+
+const isHome = pathname === "/";
+const isAbout = pathname === "/about";
+const isArticles =
+  pathname.startsWith("/articles") ||
+  pathname.startsWith("/tags") ||
+  pathname.startsWith("/search") ||
+  pathname.startsWith("/archives");
+---
+
+<div class="dock-wrapper">
+  <nav class="dock" aria-label="Primary">
+    <a class:list={["dock-link", "font-ui", { active: isHome }]} href="/">
+      Home
+    </a>
+    <a
+      class:list={["dock-link", "font-ui", { active: isArticles }]}
+      href="/articles/"
+    >
+      Articles
+    </a>
+    <a
+      class:list={["dock-link", "font-ui", { active: isAbout }]}
+      href="/about/"
+    >
+      About
+    </a>
+  </nav>
+</div>
+

@@ -1,0 +1,32 @@
+---
+import type { CollectionEntry } from "astro:content";
+import dayjs from "dayjs";
+import { getPath } from "@/utils/getPath";
+
+type Props = {
+  post: CollectionEntry<"blog">;
+};
+
+const { post } = Astro.props;
+const href = getPath(post.id, post.filePath);
+
+const tagLabel = (post.data.tags?.[0] ?? "Article")
+  .replace(/[-_]/g, " ")
+  .replace(/\b\w/g, c => c.toUpperCase());
+
+const dateLabel = dayjs(post.data.modDatetime ?? post.data.pubDatetime).format(
+  "MMM DD, YYYY"
+);
+---
+
+<a class="article-card" href={href}>
+  <div class="article-meta font-ui">
+    <span>{tagLabel}</span>
+    <span>{dateLabel}</span>
+  </div>
+  <h2 class="article-title font-display">
+    {post.data.title} <span class="icon-arrow" aria-hidden="true">↗</span>
+  </h2>
+  <p class="article-excerpt font-body">{post.data.description}</p>
+</a>
+
