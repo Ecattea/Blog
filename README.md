@@ -2,20 +2,29 @@
 
 Demo-inspired multi-page blog built with Astro.
 
-## Routes
+## Project map
 
-- `/` — Home
-- `/articles/` — Articles (paginated)
-- `/articles/<slug>/` — Article detail
-- `/about/` — About
-- `/tags/` — Tags index
-- `/tags/<tag>/` — Tag detail (paginated)
-- `/search/` — Full-text search (Pagefind)
-- `/archives/` — Archives
-
-## Content
-
-Posts live in `src/data/blog/` as Markdown files.
+| Resource | Location | Notes |
+| --- | --- | --- |
+| Articles (Markdown) | `src/data/blog/**/*.md` | Main content source |
+| Content schema | `src/content.config.ts` | Frontmatter validation |
+| Home route | `src/pages/index.astro` | `/` |
+| Articles list | `src/pages/articles/[...page].astro` | `/articles/` (paginated) |
+| Article detail | `src/pages/articles/[...slug]/index.astro` | `/articles/<slug>/` |
+| Article OG image | `src/pages/articles/[...slug]/index.png.ts` | `/articles/<slug>/index.png` |
+| Site OG image | `src/pages/og.png.ts` | `/og.png` |
+| About | `src/pages/about/index.astro` | `/about/` |
+| Tags | `src/pages/tags/index.astro` | `/tags/` |
+| Tag detail | `src/pages/tags/[tag]/[...page].astro` | `/tags/<tag>/` (paginated) |
+| Search | `src/pages/search.astro` | `/search/` (Pagefind UI) |
+| Archives | `src/pages/archives/index.astro` | `/archives/` |
+| Shared layout | `src/layouts/Layout.astro` | Fonts + view transitions + ambient + dock |
+| Design tokens | `src/styles/tokens.css` | `:root` variables |
+| Global styles | `src/styles/global.css` | Demo-derived components + transitions |
+| UI components | `src/components/` | `AmbientBackground`, `DockNav`, etc. |
+| Static assets | `public/` | Optional; `public/pagefind/` is generated for local dev (gitignored) |
+| Build output | `dist/` | Deployed assets |
+| Workers deploy config | `wrangler.jsonc` | `assets.directory = "./dist"` |
 
 ## Local dev
 

@@ -4,7 +4,7 @@
   "version": "5.5.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && pagefind --site dist && node -e \"const fs=require('fs'); const path=require('path'); const from=path.join('dist','pagefind'); const to=path.join('public','pagefind'); if(!fs.existsSync(from)){console.warn('[copy-pagefind] Skip: '+from+' not found.'); process.exit(0);} fs.rmSync(to,{recursive:true,force:true}); fs.cpSync(from,to,{recursive:true}); console.log('[copy-pagefind] Copied '+from+' -> '+to);\"",
+    "build": "astro check && astro build && pagefind --site dist && node -e \"const fs=require('fs'); const path=require('path'); const from=path.join('dist','pagefind'); const to=path.join('public','pagefind'); if(!fs.existsSync(from)){console.warn('[copy-pagefind] Skip: '+from+' not found.'); process.exit(0);} fs.mkdirSync('public',{recursive:true}); fs.rmSync(to,{recursive:true,force:true}); fs.cpSync(from,to,{recursive:true}); console.log('[copy-pagefind] Copied '+from+' -> '+to);\"",
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",
