@@ -31,6 +31,7 @@ const {
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
+const IS_DEV = import.meta.env.DEV;
 
 const structuredData = pubDatetime
   ? {
@@ -146,7 +147,17 @@ const structuredData = pubDatetime
 
     <DockNav transition:name="dock" />
 
-    <script is:inline>
+    <script is:inline define:vars={{ IS_DEV }}>
+      if (!IS_DEV && "serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js", { scope: "/" })
+            .catch(() => {
+              // no-op
+            });
+        });
+      }
+
       document.addEventListener("astro:after-swap", () => {
         window.scrollTo({ top: 0, left: 0, behavior: "auto" });
       });
