@@ -11,6 +11,11 @@ html {
   scroll-behavior: smooth;
 }
 
+html,
+body {
+  min-height: 100vh;
+}
+
 body {
   background-color: var(--bg-canvas);
   color: var(--text-primary);
@@ -39,6 +44,19 @@ a {
 ::view-transition-new(page) {
   animation-duration: 520ms;
   animation-timing-function: var(--ease-out-expo);
+}
+
+::view-transition-group(page) {
+  z-index: 1;
+}
+
+::view-transition-group(dock) {
+  z-index: 9999;
+}
+
+::view-transition-old(dock),
+::view-transition-new(dock) {
+  animation: none;
 }
 
 ::view-transition-old(page) {
@@ -259,7 +277,7 @@ h1.hero-title {
 
 .archive-container {
   width: 100%;
-  max-width: var(--article-width);
+  max-width: var(--page-width);
 }
 
 .archive-header {
@@ -448,8 +466,9 @@ h1.hero-title {
 }
 
 .post-content code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    "Liberation Mono", "Courier New", monospace;
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   font-size: 0.95em;
   background: rgba(255, 255, 255, 0.7);
   border: 1px solid var(--border-subtle);
@@ -601,8 +620,8 @@ figcaption {
   position: fixed;
   bottom: 2.5rem;
   left: 50%;
-  transform: translateX(-50%);
-  z-index: 100;
+  transform: translate3d(-50%, 0, 0);
+  z-index: 1000;
 }
 
 .dock {
@@ -672,7 +691,9 @@ figcaption {
   text-decoration: none;
   color: var(--text-primary);
   backdrop-filter: blur(12px);
-  transition: transform 0.25s var(--ease-elastic), background 0.25s ease;
+  transition:
+    transform 0.25s var(--ease-elastic),
+    background 0.25s ease;
 }
 
 .pagination-link:hover {
@@ -754,6 +775,11 @@ figcaption {
   }
   .about-layout {
     grid-template-columns: 1fr;
+  }
+  .profile-sticky {
+    position: static;
+    top: auto;
+    margin-bottom: 2rem;
   }
   .hero-card {
     padding: 2rem;

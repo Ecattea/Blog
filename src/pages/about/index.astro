@@ -14,16 +14,18 @@ import { SOCIALS } from "@/constants";
         </div>
 
         <div style="margin-top: 2rem;">
-          {SOCIALS.map(({ name, href }) => (
-            <a
-              class="social-link font-ui"
-              href={href}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {name} <span aria-hidden="true">↗</span>
-            </a>
-          ))}
+          {
+            SOCIALS.map(({ name, href }) => (
+              <a
+                class="social-link font-ui"
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {name} <span aria-hidden="true">↗</span>
+              </a>
+            ))
+          }
         </div>
       </div>
 
@@ -45,14 +47,17 @@ import { SOCIALS } from "@/constants";
         </figure>
 
         <p class="font-body">
-          Currently, I&apos;m exploring the idea of calm technology—software that
-          informs but doesn&apos;t demand attention.
+          Currently, I&apos;m exploring the idea of calm technology—software
+          that informs but doesn&apos;t demand attention.
         </p>
 
         <div
           style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-subtle);"
         >
-          <p class="font-ui" style="font-size: 0.85rem; color: var(--text-secondary);">
+          <p
+            class="font-ui"
+            style="font-size: 0.85rem; color: var(--text-secondary);"
+          >
             Built with Astro.<br />
             Type set in Playfair Display &amp; Source Serif 4.
           </p>
@@ -61,4 +66,3 @@ import { SOCIALS } from "@/constants";
     </div>
   </section>
 </Layout>
-

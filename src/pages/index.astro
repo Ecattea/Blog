@@ -10,7 +10,9 @@ const posts = await getCollection("blog", ({ data }) => !data.draft);
 const sortedPosts = getSortedPosts(posts);
 const latestPost = sortedPosts[0];
 
-const latestHref = latestPost ? getPath(latestPost.id, latestPost.filePath) : "/articles/";
+const latestHref = latestPost
+  ? getPath(latestPost.id, latestPost.filePath)
+  : "/articles/";
 const latestDateLabel = latestPost
   ? dayjs(latestPost.data.modDatetime ?? latestPost.data.pubDatetime).format(
       "MMM DD"
@@ -20,26 +22,29 @@ const latestDateLabel = latestPost
 
 <Layout title={SITE.title} description={SITE.desc}>
   <section id="home">
-    <div class="hero-header">
-      <h1 class="hero-title font-display">
-        {SITE.author} <br />
-        <span style="font-style: italic; font-weight: 400; opacity: 0.85;"
-          >{SITE.title.replace(`${SITE.author}'s `, "")}</span
-        >
-      </h1>
-      <div class="hero-subtitle font-body">{SITE.desc}</div>
-    </div>
-
-    <a class="hero-card" href={latestHref}>
-      <span class="hero-card-label font-ui">
-        {latestPost ? `Latest Entry — ${latestDateLabel}` : "Latest Entry"}
-      </span>
-      <h3 class="hero-card-title font-display">
-        {latestPost ? `"${latestPost.data.title}"` : "No posts yet."}
-      </h3>
-      <div class="hero-card-cta font-ui">
-        Read Article <span aria-hidden="true">→</span>
+    <div class="container-wide">
+      <div class="hero-header">
+        <h1 class="hero-title font-display">
+          {SITE.author}
+          <br />
+          <span style="font-style: italic; font-weight: 400; opacity: 0.85;"
+            >{SITE.title.replace(`${SITE.author}'s `, "")}</span
+          >
+        </h1>
+        <div class="hero-subtitle font-body">{SITE.desc}</div>
       </div>
-    </a>
+
+      <a class="hero-card" href={latestHref}>
+        <span class="hero-card-label font-ui">
+          {latestPost ? `Latest Entry — ${latestDateLabel}` : "Latest Entry"}
+        </span>
+        <h3 class="hero-card-title font-display">
+          {latestPost ? `"${latestPost.data.title}"` : "No posts yet."}
+        </h3>
+        <div class="hero-card-cta font-ui">
+          Read Article <span aria-hidden="true">→</span>
+        </div>
+      </a>
+    </div>
   </section>
 </Layout>

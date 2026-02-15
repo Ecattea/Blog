@@ -144,7 +144,7 @@ const structuredData = pubDatetime
       <slot />
     </main>
 
-    <DockNav transition:persist />
+    <DockNav transition:name="dock" />
 
     <script is:inline>
       document.addEventListener("astro:after-swap", () => {

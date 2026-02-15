@@ -25,8 +25,8 @@ const dateLabel = dayjs(post.data.modDatetime ?? post.data.pubDatetime).format(
     <span>{dateLabel}</span>
   </div>
   <h2 class="article-title font-display">
-    {post.data.title} <span class="icon-arrow" aria-hidden="true">↗</span>
+    {post.data.title}
+    <span class="icon-arrow" aria-hidden="true">↗</span>
   </h2>
   <p class="article-excerpt font-body">{post.data.description}</p>
 </a>
-

@@ -32,8 +32,8 @@
 }
 .font-display {
   font-family: "Playfair Display", serif;
+  font-variant-numeric: lining-nums proportional-nums;
 }
 .font-body {
   font-family: "Source Serif 4", serif;
 }
-

@@ -13,11 +13,13 @@ const tags = getUniqueTags(posts);
     <div class="archive-container">
       <div class="archive-header font-ui">Tags</div>
       <div class="tag-list font-ui">
-        {tags.map(({ tag, tagName }) => (
-          <a class="tag-link" href={`/tags/${tag}/`}>
-            {tagName}
-          </a>
-        ))}
+        {
+          tags.map(({ tag, tagName }) => (
+            <a class="tag-link" href={`/tags/${tag}/`}>
+              {tagName}
+            </a>
+          ))
+        }
       </div>
     </div>
   </section>
