@@ -19,14 +19,17 @@ const dateLabel = dayjs(post.data.modDatetime ?? post.data.pubDatetime).format(
 );
 ---
 
-<a class="article-card" href={href}>
-  <div class="article-meta font-ui">
-    <span>{tagLabel}</span>
-    <span>{dateLabel}</span>
+<a class="article-card tilt-card" href={href}>
+  <div class="tilt-glare" aria-hidden="true"></div>
+  <div class="tilt-content">
+    <div class="article-meta font-ui">
+      <span>{tagLabel}</span>
+      <span>{dateLabel}</span>
+    </div>
+    <h2 class="article-title font-display">
+      {post.data.title}
+      <span class="icon-arrow" aria-hidden="true">↗</span>
+    </h2>
+    <p class="article-excerpt font-body">{post.data.description}</p>
   </div>
-  <h2 class="article-title font-display">
-    {post.data.title}
-    <span class="icon-arrow" aria-hidden="true">↗</span>
-  </h2>
-  <p class="article-excerpt font-body">{post.data.description}</p>
 </a>
