@@ -34,15 +34,18 @@ const latestDateLabel = latestPost
         <div class="hero-subtitle font-body">{SITE.desc}</div>
       </div>
 
-      <a class="hero-card" href={latestHref}>
-        <span class="hero-card-label font-ui">
-          {latestPost ? `Latest Entry — ${latestDateLabel}` : "Latest Entry"}
-        </span>
-        <h3 class="hero-card-title font-display">
-          {latestPost ? `"${latestPost.data.title}"` : "No posts yet."}
-        </h3>
-        <div class="hero-card-cta font-ui">
-          Read Article <span aria-hidden="true">→</span>
+      <a class="hero-card tilt-card" href={latestHref}>
+        <div class="tilt-glare" aria-hidden="true"></div>
+        <div class="tilt-content">
+          <span class="hero-card-label font-ui">
+            {latestPost ? `Latest Entry — ${latestDateLabel}` : "Latest Entry"}
+          </span>
+          <h3 class="hero-card-title font-display">
+            {latestPost ? `"${latestPost.data.title}"` : "No posts yet."}
+          </h3>
+          <div class="hero-card-cta font-ui">
+            Read Article <span aria-hidden="true">→</span>
+          </div>
         </div>
       </a>
     </div>

@@ -177,6 +177,83 @@ const structuredData = pubDatetime
         return trimmed.length ? trimmed : "/";
       }
 
+      function attachTiltHandlers() {
+        if (!window.matchMedia?.("(hover: hover)")?.matches) return;
+        if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches)
+          return;
+
+        document.querySelectorAll(".tilt-card").forEach(card => {
+          if (card.dataset.tiltAttached === "1") return;
+          card.dataset.tiltAttached = "1";
+
+          card.addEventListener("mousemove", e => {
+            const clientX = e.clientX;
+            const clientY = e.clientY;
+            requestAnimationFrame(() =>
+              applyTilt(card, clientX, clientY, 4, 1.01, 1000)
+            );
+          });
+
+          card.addEventListener("mouseleave", () => {
+            resetTilt(card, 1000);
+          });
+        });
+
+        const dock = document.querySelector(".tilt-dock");
+        if (!dock) return;
+        if (dock.dataset.tiltDockAttached === "1") return;
+        dock.dataset.tiltDockAttached = "1";
+
+        dock.addEventListener("mousemove", e => {
+          const clientX = e.clientX;
+          const clientY = e.clientY;
+          requestAnimationFrame(() =>
+            applyTilt(dock, clientX, clientY, 3.5, 1.0, 500)
+          );
+        });
+
+        dock.addEventListener("mouseleave", () => {
+          resetTilt(dock, 500);
+        });
+      }
+
+      function applyTilt(card, clientX, clientY, maxRotate, scale, perspectiveVal) {
+        const glare = card.querySelector(".tilt-glare");
+        const rect = card.getBoundingClientRect();
+
+        const x = clientX - rect.left;
+        const y = clientY - rect.top;
+
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+
+        const percentX = (x - centerX) / centerX;
+        const percentY = (y - centerY) / centerY;
+
+        const rotateX = percentY * -maxRotate;
+        const rotateY = percentX * maxRotate;
+
+        card.style.transform = `
+          perspective(${perspectiveVal}px)
+          rotateX(${rotateX}deg)
+          rotateY(${rotateY}deg)
+          scale3d(${scale}, ${scale}, ${scale})
+        `;
+
+        if (glare) {
+          const glareX = 50 + percentX * 20;
+          const glareY = 50 + percentY * 20;
+          glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0) 80%)`;
+          glare.style.opacity = "1";
+        }
+      }
+
+      function resetTilt(card, perspectiveVal = 1000) {
+        const glare = card.querySelector(".tilt-glare");
+        card.style.transform = `perspective(${perspectiveVal}px) rotateX(0) rotateY(0) scale3d(1, 1, 1)`;
+        if (glare) glare.style.opacity = "0";
+      }
+
       function attachDockPerfHandlers() {
         if (!PERF_NAV_ENABLED) return;
 
@@ -224,9 +301,11 @@ const structuredData = pubDatetime
       }
 
       attachDockPerfHandlers();
+      attachTiltHandlers();
 
       document.addEventListener("astro:after-swap", () => {
         attachDockPerfHandlers();
+        attachTiltHandlers();
         markNavEnd();
       });
     </script>
