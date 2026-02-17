@@ -1,4 +1,8 @@
-<div class="ambient-layer" aria-hidden="true">
+---
+const { class: className, ...rootProps } = Astro.props;
+---
+
+<div class:list={["ambient-layer", className]} {...rootProps} aria-hidden="true">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
 </div>

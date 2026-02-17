@@ -1,6 +1,7 @@
 ---
 const rawPathname = Astro.url.pathname;
 const pathname = rawPathname.replace(/\/+$/, "") || "/";
+const { class: className, ...rootProps } = Astro.props;
 
 const isHome = pathname === "/";
 const isAbout = pathname === "/about";
@@ -11,7 +12,7 @@ const isArticles =
   pathname.startsWith("/archives");
 ---
 
-<div class="dock-wrapper">
+<div class:list={["dock-wrapper", className]} {...rootProps}>
   <nav class="dock tilt-dock" aria-label="Primary">
     <div class="tilt-glare" aria-hidden="true"></div>
     <a class:list={["dock-link", "font-ui", { active: isHome }]} href="/">

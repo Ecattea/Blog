@@ -60,8 +60,8 @@ const structuredData = pubDatetime
 <!doctype html>
 <html
   dir={SITE.dir}
-  lang=`${SITE.lang ?? "en"}`
-  class={`${scrollSmooth && "scroll-smooth"}`}
+  lang={SITE.lang ?? "en"}
+  class={scrollSmooth ? "scroll-smooth" : undefined}
 >
   <head>
     <meta charset="UTF-8" />
@@ -136,7 +136,7 @@ const structuredData = pubDatetime
       )
     }
 
-    <ClientRouter />
+    <ClientRouter fallback="swap" />
   </head>
   <body>
     <AmbientBackground transition:persist />
@@ -145,7 +145,7 @@ const structuredData = pubDatetime
       <slot />
     </main>
 
-    <DockNav transition:name="dock" />
+    <DockNav transition:name="dock" transition:animate="none" />
 
     <script is:inline define:vars={{ IS_DEV }}>
       if (!IS_DEV && "serviceWorker" in navigator) {
