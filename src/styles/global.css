@@ -650,6 +650,7 @@ figure {
 }
 
 .image-card-wrapper .image-awakening {
+  display: block;
   border-radius: 0;
   box-shadow: none;
   transform: none;
