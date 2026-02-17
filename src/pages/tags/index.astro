@@ -1,11 +1,9 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
-import getUniqueTags from "@/utils/getUniqueTags";
+import { getTagSummaries } from "@/utils/posts";
 import { SITE } from "@/config";
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
-const tags = getUniqueTags(posts);
+const tags = await getTagSummaries();
 ---
 
 <Layout title={`Tags | ${SITE.title}`}>

@@ -5,10 +5,13 @@
   "packageManager": "pnpm@10.29.3",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro check && astro build && pagefind --site dist",
+    "typecheck": "astro check",
+    "build": "pnpm run typecheck && astro build && pagefind --site dist",
     "preview": "astro preview",
     "sync": "astro sync",
     "astro": "astro",
+    "validate:fast": "pnpm run lint && pnpm run typecheck",
+    "validate:release": "pnpm run build",
     "format:check": "prettier --check .",
     "format": "prettier --write .",
     "lint": "eslint ."

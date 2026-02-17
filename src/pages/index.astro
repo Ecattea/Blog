@@ -1,13 +1,11 @@
 ---
-import { getCollection } from "astro:content";
 import dayjs from "dayjs";
 import Layout from "@/layouts/Layout.astro";
-import getSortedPosts from "@/utils/getSortedPosts";
+import { getPublishedPosts } from "@/utils/posts";
 import { SITE } from "@/config";
 import { getPath } from "@/utils/getPath";
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
-const sortedPosts = getSortedPosts(posts);
+const sortedPosts = await getPublishedPosts();
 const latestPost = sortedPosts[0];
 
 const latestHref = latestPost

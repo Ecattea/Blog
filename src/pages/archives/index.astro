@@ -1,8 +1,7 @@
 ---
-import { getCollection } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import ArticleCard from "@/components/ArticleCard.astro";
-import getPostsByGroupCondition from "@/utils/getPostsByGroupCondition";
+import { getArchiveGroups } from "@/utils/posts";
 import { SITE } from "@/config";
 
 // Redirect to 404 page if `showArchives` config is false
@@ -10,22 +9,10 @@ if (!SITE.showArchives) {
   return Astro.redirect("/404");
 }
 
-const posts = await getCollection("blog", ({ data }) => !data.draft);
-
-const months = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
+const archiveGroups = await getArchiveGroups({
+  sortBy: "pubDatetime",
+  timezone: SITE.timezone,
+});
 ---
 
 <Layout title={`Archives | ${SITE.title}`}>
@@ -33,48 +20,24 @@ const months = [
     <div class="archive-container">
       <div class="archive-header font-ui">Archives</div>
       {
-        Object.entries(
-          getPostsByGroupCondition(posts, post =>
-            post.data.pubDatetime.getFullYear()
-          )
-        )
-          .sort(([yearA], [yearB]) => Number(yearB) - Number(yearA))
-          .map(([year, yearGroup]) => (
-            <div class="archive-year">
-              <div class="archive-year-title font-display">
-                {year}{" "}
-                <sup class="archive-count font-ui">{yearGroup.length}</sup>
-              </div>
-              {Object.entries(
-                getPostsByGroupCondition(
-                  yearGroup,
-                  post => post.data.pubDatetime.getMonth() + 1
-                )
-              )
-                .sort(([monthA], [monthB]) => Number(monthB) - Number(monthA))
-                .map(([month, monthGroup]) => (
-                  <div class="archive-month">
-                    <div class="archive-month-title font-ui">
-                      {months[Number(month) - 1]}{" "}
-                      <sup class="archive-count">{monthGroup.length}</sup>
-                    </div>
-                    {monthGroup
-                      .sort(
-                        (a, b) =>
-                          Math.floor(
-                            new Date(b.data.pubDatetime).getTime() / 1000
-                          ) -
-                          Math.floor(
-                            new Date(a.data.pubDatetime).getTime() / 1000
-                          )
-                      )
-                      .map(post => (
-                        <ArticleCard post={post} />
-                      ))}
-                  </div>
-                ))}
+        archiveGroups.map(({ year, postCount, months }) => (
+          <div class="archive-year">
+            <div class="archive-year-title font-display">
+              {year} <sup class="archive-count font-ui">{postCount}</sup>
             </div>
-          ))
+            {months.map(monthGroup => (
+              <div class="archive-month">
+                <div class="archive-month-title font-ui">
+                  {monthGroup.monthLabel}{" "}
+                  <sup class="archive-count">{monthGroup.posts.length}</sup>
+                </div>
+                {monthGroup.posts.map(post => (
+                  <ArticleCard post={post} />
+                ))}
+              </div>
+            ))}
+          </div>
+        ))
       }
     </div>
   </section>
