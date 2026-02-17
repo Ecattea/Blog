@@ -15,18 +15,24 @@ const isArticles =
 <div class:list={["dock-wrapper", className]} {...rootProps}>
   <nav class="dock tilt-dock" aria-label="Primary">
     <div class="tilt-glare" aria-hidden="true"></div>
-    <a class:list={["dock-link", "font-ui", { active: isHome }]} href="/">
+    <a
+      class:list={["dock-link", "font-ui", { active: isHome }]}
+      href="/"
+      data-astro-prefetch="viewport"
+    >
       Home
     </a>
     <a
       class:list={["dock-link", "font-ui", { active: isArticles }]}
       href="/articles/"
+      data-astro-prefetch="viewport"
     >
       Articles
     </a>
     <a
       class:list={["dock-link", "font-ui", { active: isAbout }]}
       href="/about/"
+      data-astro-prefetch="viewport"
     >
       About
     </a>
