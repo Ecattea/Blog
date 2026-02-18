@@ -58,15 +58,17 @@ const dateLabel = dayjs(modDatetime ?? pubDatetime).format("MMM DD, YYYY");
 
 <Layout {...layoutProps}>
   <section id="post">
-    <div class="post-container">
-      <h1 class="post-title font-display">{title}</h1>
-      <div class="post-meta font-ui">
+    <div class="post-container" data-pagefind-body>
+      <h1 class="post-title font-display">
+        {title}
+      </h1>
+      <div class="post-meta font-ui" data-pagefind-ignore>
         <a href="/articles/">Archive</a>
         <span aria-hidden="true">•</span>
         <span>{dateLabel}</span>
       </div>
 
-      <article class="post-content font-body" data-pagefind-body>
+      <article class="post-content font-body">
         <Content />
       </article>
     </div>

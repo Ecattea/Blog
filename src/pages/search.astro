@@ -19,8 +19,146 @@ import { SITE } from "@/config";
       document.querySelector("#pagefind-search");
 
     if (!pageFindSearch) return;
+    const searchRoot = pageFindSearch;
 
     const params = new URLSearchParams(window.location.search);
+    const getCurrentTerm = () =>
+      (
+        document.querySelector<HTMLInputElement>(".pagefind-ui__search-input")
+          ?.value ??
+        params.get("q") ??
+        ""
+      ).trim();
+
+    const parseTerms = (value: string) => [
+      ...new Set(value.split(/\s+/g).filter(Boolean)),
+    ];
+
+    const escapeRegExp = (value: string) =>
+      value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    const stripMarkTags = (value: string) =>
+      value.replace(/<mark\b[^>]*>/gi, "").replace(/<\/mark>/gi, "");
+
+    const buildMatcher = (value: string) => {
+      const terms = parseTerms(value);
+      if (terms.length === 0) return null;
+      return new RegExp(`(${terms.map(escapeRegExp).join("|")})`, "gi");
+    };
+
+    function highlightTextNodes(root: HTMLElement, matcher: RegExp | null) {
+      if (!matcher) return;
+
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      const textNodes: Text[] = [];
+      let current = walker.nextNode();
+
+      while (current) {
+        if (current instanceof Text) {
+          const text = current.nodeValue ?? "";
+          if (text.trim().length > 0) {
+            textNodes.push(current);
+          }
+        }
+        current = walker.nextNode();
+      }
+
+      textNodes.forEach(node => {
+        const text = node.nodeValue ?? "";
+        matcher.lastIndex = 0;
+        if (!matcher.test(text)) return;
+        matcher.lastIndex = 0;
+
+        const fragment = document.createDocumentFragment();
+        let lastIndex = 0;
+
+        text.replace(matcher, (match, _group, offset) => {
+          const start = Number(offset);
+
+          if (start > lastIndex) {
+            fragment.append(
+              document.createTextNode(text.slice(lastIndex, start))
+            );
+          }
+
+          const mark = document.createElement("mark");
+          mark.textContent = match;
+          fragment.append(mark);
+          lastIndex = start + match.length;
+
+          return match;
+        });
+
+        if (lastIndex < text.length) {
+          fragment.append(document.createTextNode(text.slice(lastIndex)));
+        }
+
+        node.parentNode?.replaceChild(fragment, node);
+      });
+    }
+
+    function applyCustomHighlights(rawTerm: string) {
+      const matcher = buildMatcher(rawTerm);
+
+      const links = searchRoot.querySelectorAll<HTMLAnchorElement>(
+        ".pagefind-ui__result-title .pagefind-ui__result-link"
+      );
+
+      links.forEach(link => {
+        if (!link.dataset.pagefindRawText) {
+          link.dataset.pagefindRawText = link.textContent ?? "";
+        }
+
+        link.textContent = link.dataset.pagefindRawText;
+        highlightTextNodes(link, matcher);
+      });
+
+      const excerpts = searchRoot.querySelectorAll<HTMLElement>(
+        ".pagefind-ui__result-excerpt"
+      );
+
+      excerpts.forEach(excerpt => {
+        if (!excerpt.dataset.pagefindRawHtml) {
+          excerpt.dataset.pagefindRawHtml = stripMarkTags(excerpt.innerHTML);
+        }
+
+        excerpt.innerHTML = excerpt.dataset.pagefindRawHtml;
+        highlightTextNodes(excerpt, matcher);
+      });
+    }
+
+    let pendingHighlight = false;
+    let nextTerm = "";
+    const scheduleHighlight = (rawTerm: string) => {
+      nextTerm = rawTerm;
+      if (pendingHighlight) return;
+
+      pendingHighlight = true;
+      window.requestAnimationFrame(() => {
+        pendingHighlight = false;
+        applyCustomHighlights(nextTerm);
+      });
+    };
+
+    if (searchRoot.dataset.searchHighlightBound !== "1") {
+      searchRoot.dataset.searchHighlightBound = "1";
+
+      const observer = new MutationObserver(() => {
+        scheduleHighlight(getCurrentTerm());
+      });
+
+      observer.observe(searchRoot, {
+        childList: true,
+        subtree: true,
+      });
+
+      document.addEventListener("input", event => {
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement)) return;
+        if (!target.classList.contains("pagefind-ui__search-input")) return;
+        scheduleHighlight(target.value);
+      });
+    }
 
     const onIdle = window.requestIdleCallback || (cb => setTimeout(cb, 1));
 
@@ -48,6 +186,7 @@ import { SITE } from "@/config";
           params.set("q", term); // Update the `q` parameter in the URL
           history.replaceState(history.state, "", "?" + params.toString()); // Push the new URL without reloading
 
+          scheduleHighlight(term);
           return term;
         },
       });
@@ -56,6 +195,7 @@ import { SITE } from "@/config";
       const query = params.get("q");
       if (query) {
         search.triggerSearch(query);
+        scheduleHighlight(query);
       }
 
       // Reset search param if search input is cleared
@@ -125,6 +265,13 @@ import { SITE } from "@/config";
       text-decoration-line: none;
       outline-width: 2px;
       outline-style: dashed;
+    }
+
+    mark {
+      background: #87ceeb;
+      color: #0d2a3a;
+      border-radius: 0.2em;
+      padding: 0 0.12em;
     }
 
     .pagefind-ui__result:last-of-type {
