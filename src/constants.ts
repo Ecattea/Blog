@@ -12,4 +12,4 @@ export const SOCIALS: Social[] = [
     href: "https://github.com/ecattea",
     linkTitle: `${SITE.title} on GitHub`,
   },
-] as const;
+];
