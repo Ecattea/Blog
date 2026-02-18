@@ -578,7 +578,7 @@ h1.hero-title {
   border: 1px solid var(--border-subtle);
 }
 
-.post-content figcaption {
+figcaption {
   font-size: 0.85rem;
   color: var(--text-secondary);
   margin-top: 0.8rem;
