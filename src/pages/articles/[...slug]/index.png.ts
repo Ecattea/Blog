@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 import type { CollectionEntry } from "astro:content";
 import { getPath } from "@/utils/getPath";
 import { generateOgImageForPost } from "@/utils/generateOgImages";
-import { getPublishedPosts } from "@/utils/posts";
+import { getPublishedPosts } from "@/domain/posts";
 import { SITE } from "@/config";
 
 export async function getStaticPaths() {
