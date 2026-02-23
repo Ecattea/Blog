@@ -1,5 +1,12 @@
 import * as domain from "@/domain/posts";
 
+/**
+ * Temporary compatibility facade during ECA-58 migration.
+ *
+ * New or migrated callers should import from "@/domain/posts" directly.
+ * This facade stays only to avoid one-shot rewiring risk and will be
+ * retired after ECA-58 child issues complete (target: ECA-68).
+ */
 export type BlogPost = domain.BlogPost;
 export type PostSortField = domain.PostSortField;
 

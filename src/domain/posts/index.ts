@@ -2,6 +2,21 @@ import { getCollection, type CollectionEntry } from "astro:content";
 import { SITE } from "@/config";
 import { slugifyAll, slugifyStr } from "@/utils/slugify";
 
+/**
+ * Post-query domain contract (ECA-64 baseline).
+ *
+ * Stable export surface for migration:
+ * - types: BlogPost, PostSortField, PostQueryOptions, TagSummary,
+ *   ArchiveMonthGroup, ArchiveYearGroup
+ * - functions: matchesPostQuery, applyPostQuery, getPublishedPosts,
+ *   getTagSummariesFromPosts, getTagSummaries, getPostsByTagFromPosts,
+ *   getPostsByTag, getArchiveGroupsFromPosts, getArchiveGroups
+ *
+ * Locked behavior:
+ * - no editorial visibility states
+ * - no draft filtering
+ * - no scheduled publication logic
+ */
 export type BlogPost = CollectionEntry<"blog">;
 export type PostSortField = "pubDatetime" | "modDatetime";
 
@@ -100,6 +115,11 @@ export const getPublishedPosts = async (options: PostQueryOptions = {}) => {
 const aliasComparator = (a: string, b: string) =>
   a.localeCompare(b, undefined, { sensitivity: "base" }) || a.localeCompare(b);
 
+/**
+ * Deterministic tag display-name rule:
+ * pick the first alias after case-insensitive lexicographic sorting,
+ * then fall back to normalized slug if aliases are absent.
+ */
 const pickTagDisplayName = (tagAliases: Set<string>, fallback: string) => {
   const aliases = [...tagAliases].sort(aliasComparator);
   return aliases[0] ?? fallback;
