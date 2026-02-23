@@ -1,6 +1,6 @@
 ---
 import Layout from "@/layouts/Layout.astro";
-import { getTagSummaries } from "@/utils/posts";
+import { getTagSummaries } from "@/domain/posts";
 import { SITE } from "@/config";
 
 const tags = await getTagSummaries();
