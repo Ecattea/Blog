@@ -1,7 +1,6 @@
 ---
 pubDatetime: 2026-02-10T09:00:00.000Z
 title: "The politics of housing: when 1,000 homes aren't enough"
-draft: false
 tags:
   - sample
   - economist

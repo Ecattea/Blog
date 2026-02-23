@@ -1,7 +1,6 @@
 ---
 pubDatetime: 2026-02-14T09:00:00.000Z
 title: "Inflation 2.0: why prices feel sticky in 2026"
-draft: false
 tags:
   - sample
   - economist

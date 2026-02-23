@@ -1,7 +1,6 @@
 ---
 pubDatetime: 2026-02-11T09:00:00.000Z
 title: "China, chips and sanctions: the 5% question"
-draft: false
 tags:
   - sample
   - economist
