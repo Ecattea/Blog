@@ -48,6 +48,51 @@ pnpm run validate:fast    # lint + typecheck
 pnpm run validate:release # full production validation (build + pagefind)
 ```
 
+## Writing Posts
+
+Published posts should live under `src/data/blog/`.
+
+- Recommended default location: `src/data/blog/<slug>.md`
+- Optional grouped location: `src/data/blog/<group>/<slug>.md`
+- Reserved non-published paths: any file or directory starting with `_`
+
+Examples:
+
+```text
+src/data/blog/my-first-post.md
+src/data/blog/notes/my-second-post.md
+src/data/blog/_templates/post-template.md   # not published
+src/data/blog/_drafts/idea.md               # not published
+```
+
+Current frontmatter contract:
+
+```yaml
+---
+title: "My first post"
+description: "Short summary for cards and metadata."
+pubDatetime: 2026-03-06T09:00:00.000Z
+tags:
+  - notes
+modDatetime: 2026-03-06T09:00:00.000Z # optional
+canonicalURL: "https://example.com/my-first-post/" # optional
+---
+```
+
+Required fields:
+
+- `title`
+- `description`
+- `pubDatetime`
+
+Common optional fields:
+
+- `tags`
+- `modDatetime`
+- `canonicalURL`
+
+This repository is optimized for personal use. Local validation stays lightweight, and production confidence comes from `pnpm run validate:release` plus deployment-time build checks.
+
 ## Deploy (Cloudflare Workers static assets)
 
 This project deploys `dist/` as static assets via `wrangler.jsonc`.
