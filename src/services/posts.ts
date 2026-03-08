@@ -8,7 +8,7 @@ import { slugifyAll, slugifyStr } from "@/utils/slugify";
  * Stable export surface for migration:
  * - types: BlogPost, PostSortField, PostQueryOptions, TagSummary,
  *   ArchiveMonthGroup, ArchiveYearGroup
- * - functions: matchesPostQuery, applyPostQuery, getPublishedPosts,
+ * - functions: applyPostQuery, getPublishedPosts,
  *   getTagSummariesFromPosts, getTagSummaries, getPostsByTagFromPosts,
  *   getPostsByTag, getArchiveGroupsFromPosts, getArchiveGroups
  *
@@ -84,14 +84,6 @@ const getSortTimestamp = (post: BlogPost, sortBy: PostSortField) => {
     return post.data.pubDatetime.getTime();
   }
   return (post.data.modDatetime ?? post.data.pubDatetime).getTime();
-};
-
-export const matchesPostQuery = (
-  _post: BlogPost,
-  options: PostQueryOptions = {}
-) => {
-  resolveQueryOptions(options);
-  return true;
 };
 
 export const applyPostQuery = (
