@@ -56,12 +56,16 @@ const layoutProps = {
 
 const publishedLabel = formatDisplayDate(pubDatetime);
 const publishedDateTime = pubDatetime.toISOString();
-const hasUpdatedDate =
-  modDatetime instanceof Date && modDatetime.getTime() !== pubDatetime.getTime();
-const updatedLabel =
-  hasUpdatedDate && modDatetime ? formatDisplayDate(modDatetime) : undefined;
-const updatedDateTime =
-  hasUpdatedDate && modDatetime ? modDatetime.toISOString() : undefined;
+const updatedDate =
+  modDatetime instanceof Date && modDatetime.getTime() !== pubDatetime.getTime()
+    ? modDatetime
+    : undefined;
+const updatedLabel = updatedDate ? formatDisplayDate(updatedDate) : undefined;
+const updatedDateTime = updatedDate?.toISOString();
+const tagLinks = post.data.tags.map(tag => ({
+  label: tag,
+  href: `/tags/${slugifyStr(tag)}/`,
+}));
 ---
 
 <Layout {...layoutProps}>
@@ -76,27 +80,31 @@ const updatedDateTime =
             <a class="post-return-link" href="/articles/">
               Archive
             </a>
-            <div class="post-facts" aria-label="Article metadata">
-              <span class="post-fact">
-                <span class="post-fact-label">Published</span>
-                <time datetime={publishedDateTime}>{publishedLabel}</time>
-              </span>
+            <dl class="post-facts" aria-label="Article metadata">
+              <div class="post-fact">
+                <dt class="post-fact-label">Published</dt>
+                <dd class="post-fact-value">
+                  <time datetime={publishedDateTime}>{publishedLabel}</time>
+                </dd>
+              </div>
               {
                 updatedLabel && updatedDateTime && (
-                  <span class="post-fact">
-                    <span class="post-fact-label">Updated</span>
-                    <time datetime={updatedDateTime}>{updatedLabel}</time>
-                  </span>
+                  <div class="post-fact">
+                    <dt class="post-fact-label">Updated</dt>
+                    <dd class="post-fact-value">
+                      <time datetime={updatedDateTime}>{updatedLabel}</time>
+                    </dd>
+                  </div>
                 )
               }
-            </div>
+            </dl>
           </div>
           {
-            post.data.tags.length > 0 && (
+            tagLinks.length > 0 && (
               <div class="post-tag-list" aria-label="Article tags">
-                {post.data.tags.map(tag => (
-                  <a class="post-tag-chip" href={`/tags/${slugifyStr(tag)}/`}>
-                    {tag}
+                {tagLinks.map(({ label, href }) => (
+                  <a class="post-tag-chip" href={href}>
+                    {label}
                   </a>
                 ))}
               </div>
