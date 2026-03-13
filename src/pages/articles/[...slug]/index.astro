@@ -136,4 +136,13 @@ const showOutline = shouldShowPostOutline(outline);
       {showOutline && <PostOutline outline={outline} variant="desktop" />}
     </div>
   </section>
+
+  {
+    showOutline && (
+      <script>
+        import { initPostOutlineRuntime } from "@/scripts/postOutlineRuntime";
+        initPostOutlineRuntime();
+      </script>
+    )
+  }
 </Layout>

@@ -1,0 +1,330 @@
+const DESKTOP_BREAKPOINT_QUERY = "(min-width: 960px)";
+const HOVER_POINTER_QUERY = "(hover: hover)";
+const DESKTOP_OUTLINE_SELECTOR = '[data-post-outline="desktop"]';
+const ACTIVE_CLASS = "is-active";
+const INDICATOR_INSET_Y = 6;
+const NAVIGATION_LOCK_TIMEOUT_MS = 1600;
+
+type Cleanup = () => void;
+
+interface OutlineEntry {
+  heading: HTMLElement;
+  link: HTMLAnchorElement;
+}
+
+declare global {
+  interface Window {
+    __postOutlineRuntimeAttached?: boolean;
+    __postOutlineRuntimeCleanup?: Cleanup | null;
+  }
+}
+
+const parseCssLength = (value: string) => {
+  const trimmed = value.trim();
+  if (!trimmed) return 0;
+
+  if (trimmed.endsWith("rem")) {
+    const rootFontSize = Number.parseFloat(
+      getComputedStyle(document.documentElement).fontSize
+    );
+    const remValue = Number.parseFloat(trimmed);
+    return Number.isFinite(rootFontSize) && Number.isFinite(remValue)
+      ? remValue * rootFontSize
+      : 0;
+  }
+
+  const parsed = Number.parseFloat(trimmed);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const getHeadingOffset = () => {
+  const postRoot = document.querySelector<HTMLElement>("#post");
+  if (!postRoot) return 104;
+
+  const rawValue = getComputedStyle(postRoot).getPropertyValue(
+    "--post-heading-scroll-offset"
+  );
+
+  return parseCssLength(rawValue) || 104;
+};
+
+const getActivationLine = () => getHeadingOffset() + 8;
+
+const getMaxScrollTop = () =>
+  Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
+const getRemainingScroll = () => getMaxScrollTop() - window.scrollY;
+
+const isNearDocumentEnd = () => getRemainingScroll() <= 2;
+
+const hasReachedEntry = (entry: OutlineEntry) =>
+  entry.heading.getBoundingClientRect().top <= getActivationLine() ||
+  isNearDocumentEnd();
+
+const shouldEnableDesktopOutline = () =>
+  window.matchMedia(DESKTOP_BREAKPOINT_QUERY).matches &&
+  window.matchMedia(HOVER_POINTER_QUERY).matches;
+
+const onMediaChange = (
+  mediaQueryList: MediaQueryList,
+  listener: () => void
+): Cleanup => {
+  if (typeof mediaQueryList.addEventListener !== "function") {
+    return () => {};
+  }
+
+  const handleChange = () => {
+    listener();
+  };
+
+  mediaQueryList.addEventListener("change", handleChange);
+  return () => mediaQueryList.removeEventListener("change", handleChange);
+};
+
+const cleanupMountedRuntime = () => {
+  window.__postOutlineRuntimeCleanup?.();
+  window.__postOutlineRuntimeCleanup = null;
+};
+
+const queryOutlineEntries = () => {
+  if (!shouldEnableDesktopOutline()) return null;
+
+  const root = document.querySelector<HTMLElement>(DESKTOP_OUTLINE_SELECTOR);
+  const nav = root?.querySelector<HTMLElement>(".post-outline-nav");
+  const indicator = root?.querySelector<HTMLElement>(".post-outline-indicator");
+
+  if (!root || !nav || !indicator) return null;
+
+  const entries = [
+    ...root.querySelectorAll<HTMLAnchorElement>(
+      ".post-outline-link[data-outline-target]"
+    ),
+  ]
+    .map(link => {
+      const slug = link.dataset.outlineTarget?.trim();
+      const heading = slug ? document.getElementById(slug) : null;
+
+      if (!slug || !(heading instanceof HTMLElement)) {
+        return null;
+      }
+
+      return { heading, link };
+    })
+    .filter((entry): entry is OutlineEntry => entry !== null);
+
+  if (entries.length === 0) return null;
+
+  return { indicator, nav, entries };
+};
+
+const pickActiveEntry = (entries: OutlineEntry[]) => {
+  if (isNearDocumentEnd()) {
+    return entries.at(-1) ?? entries[0];
+  }
+
+  const activationLine = getActivationLine();
+  let activeEntry = entries[0];
+
+  for (const entry of entries) {
+    if (entry.heading.getBoundingClientRect().top <= activationLine) {
+      activeEntry = entry;
+      continue;
+    }
+
+    break;
+  }
+
+  return activeEntry;
+};
+
+const mountPostOutlineRuntime = () => {
+  cleanupMountedRuntime();
+
+  const queried = queryOutlineEntries();
+  if (!queried) return;
+
+  const { indicator, nav, entries } = queried;
+  let activeEntry = pickActiveEntry(entries);
+  let hoveredEntry: OutlineEntry | null = null;
+  let lockedEntry: OutlineEntry | null = null;
+  let navigationLockTimeoutId = 0;
+  let indicatorFrameId = 0;
+  let syncFrameId = 0;
+
+  const setActiveState = (nextActive: OutlineEntry) => {
+    activeEntry = nextActive;
+    entries.forEach(({ link }) => {
+      link.classList.toggle(ACTIVE_CLASS, link === nextActive.link);
+    });
+  };
+
+  const clearNavigationLock = () => {
+    lockedEntry = null;
+    if (!navigationLockTimeoutId) return;
+
+    window.clearTimeout(navigationLockTimeoutId);
+    navigationLockTimeoutId = 0;
+  };
+
+  const lockNavigationToEntry = (entry: OutlineEntry) => {
+    clearNavigationLock();
+    lockedEntry = entry;
+    navigationLockTimeoutId = window.setTimeout(() => {
+      navigationLockTimeoutId = 0;
+      lockedEntry = null;
+      scheduleSyncActiveEntry();
+    }, NAVIGATION_LOCK_TIMEOUT_MS);
+  };
+
+  const renderIndicator = (entry: OutlineEntry | null) => {
+    if (!entry) {
+      indicator.style.opacity = "0";
+      indicator.style.height = "0";
+      return;
+    }
+
+    const navRect = nav.getBoundingClientRect();
+    const linkRect = entry.link.getBoundingClientRect();
+    const height = Math.max(0, linkRect.height - INDICATOR_INSET_Y * 2);
+    const nextTop = Math.max(0, linkRect.top - navRect.top + INDICATOR_INSET_Y);
+
+    indicator.style.opacity = "1";
+    indicator.style.height = `${Math.round(height)}px`;
+    indicator.style.transform = `translateY(${Math.round(nextTop)}px)`;
+  };
+
+  const scheduleIndicator = (entry: OutlineEntry | null) => {
+    if (indicatorFrameId) cancelAnimationFrame(indicatorFrameId);
+
+    indicatorFrameId = requestAnimationFrame(() => {
+      indicatorFrameId = 0;
+      renderIndicator(entry);
+    });
+  };
+
+  const syncActiveEntry = () => {
+    if (lockedEntry) {
+      if (!hasReachedEntry(lockedEntry)) {
+        setActiveState(lockedEntry);
+        scheduleIndicator(lockedEntry);
+        return;
+      }
+
+      clearNavigationLock();
+    }
+
+    const nextActive = pickActiveEntry(entries);
+    setActiveState(nextActive);
+    scheduleIndicator(hoveredEntry ?? nextActive);
+  };
+
+  const scheduleSyncActiveEntry = () => {
+    if (syncFrameId) return;
+
+    syncFrameId = requestAnimationFrame(() => {
+      syncFrameId = 0;
+      syncActiveEntry();
+    });
+  };
+
+  const linkCleanup = entries.flatMap(entry => {
+    const handleMouseEnter = () => {
+      if (lockedEntry) return;
+      hoveredEntry = entry;
+      scheduleIndicator(entry);
+    };
+
+    const handleFocus = () => {
+      if (lockedEntry) return;
+      hoveredEntry = entry;
+      scheduleIndicator(entry);
+    };
+
+    const handleClick = () => {
+      hoveredEntry = null;
+      lockNavigationToEntry(entry);
+      setActiveState(entry);
+      scheduleIndicator(entry);
+    };
+
+    entry.link.addEventListener("mouseenter", handleMouseEnter);
+    entry.link.addEventListener("focus", handleFocus);
+    entry.link.addEventListener("click", handleClick);
+
+    return [
+      () => entry.link.removeEventListener("mouseenter", handleMouseEnter),
+      () => entry.link.removeEventListener("focus", handleFocus),
+      () => entry.link.removeEventListener("click", handleClick),
+    ];
+  });
+
+  const handleMouseLeave = () => {
+    if (lockedEntry) return;
+    hoveredEntry = null;
+    scheduleIndicator(activeEntry);
+  };
+
+  const handleFocusOut = (event: FocusEvent) => {
+    if (lockedEntry) return;
+
+    const relatedTarget = event.relatedTarget;
+    if (relatedTarget instanceof Node && nav.contains(relatedTarget)) return;
+
+    hoveredEntry = null;
+    scheduleIndicator(activeEntry);
+  };
+
+  const handleScroll = () => {
+    scheduleSyncActiveEntry();
+  };
+
+  const handleResize = () => {
+    scheduleSyncActiveEntry();
+  };
+
+  const handleHashChange = () => {
+    scheduleSyncActiveEntry();
+  };
+
+  nav.addEventListener("mouseleave", handleMouseLeave);
+  nav.addEventListener("focusout", handleFocusOut);
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("resize", handleResize, { passive: true });
+  window.addEventListener("hashchange", handleHashChange);
+
+  setActiveState(activeEntry);
+  renderIndicator(activeEntry);
+
+  window.__postOutlineRuntimeCleanup = () => {
+    clearNavigationLock();
+    nav.removeEventListener("mouseleave", handleMouseLeave);
+    nav.removeEventListener("focusout", handleFocusOut);
+    window.removeEventListener("scroll", handleScroll);
+    window.removeEventListener("resize", handleResize);
+    window.removeEventListener("hashchange", handleHashChange);
+    linkCleanup.forEach(cleanup => cleanup());
+    if (indicatorFrameId) cancelAnimationFrame(indicatorFrameId);
+    if (syncFrameId) cancelAnimationFrame(syncFrameId);
+    indicator.style.opacity = "0";
+    indicator.style.height = "0";
+  };
+};
+
+export function initPostOutlineRuntime() {
+  if (typeof window === "undefined") return;
+
+  mountPostOutlineRuntime();
+
+  if (window.__postOutlineRuntimeAttached) return;
+
+  window.__postOutlineRuntimeAttached = true;
+  document.addEventListener("astro:after-swap", () => {
+    mountPostOutlineRuntime();
+  });
+  onMediaChange(window.matchMedia(DESKTOP_BREAKPOINT_QUERY), () => {
+    mountPostOutlineRuntime();
+  });
+  onMediaChange(window.matchMedia(HOVER_POINTER_QUERY), () => {
+    mountPostOutlineRuntime();
+  });
+}

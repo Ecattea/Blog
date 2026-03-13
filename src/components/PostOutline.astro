@@ -30,9 +30,11 @@ const outlineLabel = "Article outline";
       data-post-outline="desktop"
       aria-label={outlineLabel}
     >
-      <div class="post-outline-sticky">
+      <div class="post-outline-card">
         <div class="post-outline-eyebrow">{outlineTitle}</div>
-        <PostOutlineNav outline={outline} />
+        <div class="post-outline-scroll">
+          <PostOutlineNav outline={outline} />
+        </div>
       </div>
     </aside>
   )
