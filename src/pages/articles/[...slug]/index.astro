@@ -1,10 +1,11 @@
 ---
 import { type CollectionEntry, render } from "astro:content";
-import dayjs from "dayjs";
 import Layout from "@/layouts/Layout.astro";
 import { getPath } from "@/utils/getPath";
 import { getPublishedPosts } from "@/services/posts";
 import { SITE } from "@/config";
+import { formatDisplayDate } from "@/utils/formatDate";
+import { slugifyStr } from "@/utils/slugify";
 
 type Props = {
   post: CollectionEntry<"blog">;
@@ -53,20 +54,56 @@ const layoutProps = {
   scrollSmooth: true,
 };
 
-const dateLabel = dayjs(modDatetime ?? pubDatetime).format("MMM DD, YYYY");
+const publishedLabel = formatDisplayDate(pubDatetime);
+const publishedDateTime = pubDatetime.toISOString();
+const hasUpdatedDate =
+  modDatetime instanceof Date && modDatetime.getTime() !== pubDatetime.getTime();
+const updatedLabel =
+  hasUpdatedDate && modDatetime ? formatDisplayDate(modDatetime) : undefined;
+const updatedDateTime =
+  hasUpdatedDate && modDatetime ? modDatetime.toISOString() : undefined;
 ---
 
 <Layout {...layoutProps}>
   <section id="post">
     <div class="post-container" data-pagefind-body>
-      <h1 class="post-title font-display">
-        {title}
-      </h1>
-      <div class="post-meta font-ui" data-pagefind-ignore>
-        <a href="/articles/">Archive</a>
-        <span aria-hidden="true">•</span>
-        <span>{dateLabel}</span>
-      </div>
+      <header class="post-header">
+        <h1 class="post-title font-display">
+          {title}
+        </h1>
+        <div class="post-meta-panel font-ui" data-pagefind-ignore>
+          <div class="post-meta-row">
+            <a class="post-return-link" href="/articles/">
+              Archive
+            </a>
+            <div class="post-facts" aria-label="Article metadata">
+              <span class="post-fact">
+                <span class="post-fact-label">Published</span>
+                <time datetime={publishedDateTime}>{publishedLabel}</time>
+              </span>
+              {
+                updatedLabel && updatedDateTime && (
+                  <span class="post-fact">
+                    <span class="post-fact-label">Updated</span>
+                    <time datetime={updatedDateTime}>{updatedLabel}</time>
+                  </span>
+                )
+              }
+            </div>
+          </div>
+          {
+            post.data.tags.length > 0 && (
+              <div class="post-tag-list" aria-label="Article tags">
+                {post.data.tags.map(tag => (
+                  <a class="post-tag-chip" href={`/tags/${slugifyStr(tag)}/`}>
+                    {tag}
+                  </a>
+                ))}
+              </div>
+            )
+          }
+        </div>
+      </header>
 
       <article class="post-content font-body">
         <Content />

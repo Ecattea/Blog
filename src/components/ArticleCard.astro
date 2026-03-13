@@ -1,6 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import dayjs from "dayjs";
+import { formatDisplayDate } from "@/utils/formatDate";
 import { getPath } from "@/utils/getPath";
 
 type Props = {
@@ -14,9 +14,9 @@ const tagLabel = (post.data.tags?.[0] ?? "Article")
   .replace(/[-_]/g, " ")
   .replace(/\b\w/g, c => c.toUpperCase());
 
-const dateLabel = dayjs(post.data.modDatetime ?? post.data.pubDatetime).format(
-  "MMM DD, YYYY"
-);
+const displayDate = post.data.modDatetime ?? post.data.pubDatetime;
+const dateLabel = formatDisplayDate(displayDate);
+const dateTime = displayDate.toISOString();
 ---
 
 <a class="article-card tilt-card" href={href}>
@@ -24,7 +24,7 @@ const dateLabel = dayjs(post.data.modDatetime ?? post.data.pubDatetime).format(
   <div class="tilt-content">
     <div class="article-meta font-ui">
       <span>{tagLabel}</span>
-      <span>{dateLabel}</span>
+      <time datetime={dateTime}>{dateLabel}</time>
     </div>
     <h2 class="article-title font-display">
       {post.data.title}

@@ -1,8 +1,8 @@
 ---
-import dayjs from "dayjs";
 import Layout from "@/layouts/Layout.astro";
 import { getPublishedPosts } from "@/services/posts";
 import { SITE } from "@/config";
+import { formatDisplayDate } from "@/utils/formatDate";
 import { getPath } from "@/utils/getPath";
 
 const sortedPosts = await getPublishedPosts();
@@ -12,9 +12,7 @@ const latestHref = latestPost
   ? getPath(latestPost.id, latestPost.filePath)
   : "/articles/";
 const latestDateLabel = latestPost
-  ? dayjs(latestPost.data.modDatetime ?? latestPost.data.pubDatetime).format(
-      "MMM DD"
-    )
+  ? formatDisplayDate(latestPost.data.modDatetime ?? latestPost.data.pubDatetime)
   : "";
 ---
 
