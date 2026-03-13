@@ -1,10 +1,15 @@
 ---
 import { type CollectionEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
+import PostOutline from "@/components/PostOutline.astro";
 import { getPath } from "@/utils/getPath";
 import { getPublishedPosts } from "@/services/posts";
 import { SITE } from "@/config";
 import { formatDisplayDate } from "@/utils/formatDate";
+import {
+  getPostOutline,
+  MIN_POST_OUTLINE_ITEMS,
+} from "@/utils/postOutline";
 import { slugifyStr } from "@/utils/slugify";
 
 type Props = {
@@ -20,7 +25,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content } = await render(post);
+const { Content, headings } = await render(post);
 
 const {
   title,
@@ -66,56 +71,64 @@ const tagLinks = post.data.tags.map(tag => ({
   label: tag,
   href: `/tags/${slugifyStr(tag)}/`,
 }));
+const outline = getPostOutline(headings);
+const showOutline = outline.length >= MIN_POST_OUTLINE_ITEMS;
 ---
 
 <Layout {...layoutProps}>
   <section id="post">
-    <div class="post-container" data-pagefind-body>
-      <header class="post-header">
-        <h1 class="post-title font-display">
-          {title}
-        </h1>
-        <div class="post-meta-panel font-ui" data-pagefind-ignore>
-          <div class="post-meta-row">
-            <a class="post-return-link" href="/articles/">
-              Archive
-            </a>
-            <dl class="post-facts" aria-label="Article metadata">
-              <div class="post-fact">
-                <dt class="post-fact-label">Published</dt>
-                <dd class="post-fact-value">
-                  <time datetime={publishedDateTime}>{publishedLabel}</time>
-                </dd>
-              </div>
-              {
-                updatedLabel && updatedDateTime && (
-                  <div class="post-fact">
-                    <dt class="post-fact-label">Updated</dt>
-                    <dd class="post-fact-value">
-                      <time datetime={updatedDateTime}>{updatedLabel}</time>
-                    </dd>
-                  </div>
-                )
-              }
-            </dl>
+    <div class:list={["post-shell", showOutline && "post-shell-with-outline"]}>
+      <div class="post-main" data-pagefind-body>
+        <header class="post-header">
+          <h1 class="post-title font-display">
+            {title}
+          </h1>
+          <div class="post-meta-panel font-ui" data-pagefind-ignore>
+            <div class="post-meta-row">
+              <a class="post-return-link" href="/articles/">
+                Archive
+              </a>
+              <dl class="post-facts" aria-label="Article metadata">
+                <div class="post-fact">
+                  <dt class="post-fact-label">Published</dt>
+                  <dd class="post-fact-value">
+                    <time datetime={publishedDateTime}>{publishedLabel}</time>
+                  </dd>
+                </div>
+                {
+                  updatedLabel && updatedDateTime && (
+                    <div class="post-fact">
+                      <dt class="post-fact-label">Updated</dt>
+                      <dd class="post-fact-value">
+                        <time datetime={updatedDateTime}>{updatedLabel}</time>
+                      </dd>
+                    </div>
+                  )
+                }
+              </dl>
+            </div>
+            {
+              tagLinks.length > 0 && (
+                <div class="post-tag-list" aria-label="Article tags">
+                  {tagLinks.map(({ label, href }) => (
+                    <a class="post-tag-chip" href={href}>
+                      {label}
+                    </a>
+                  ))}
+                </div>
+              )
+            }
           </div>
-          {
-            tagLinks.length > 0 && (
-              <div class="post-tag-list" aria-label="Article tags">
-                {tagLinks.map(({ label, href }) => (
-                  <a class="post-tag-chip" href={href}>
-                    {label}
-                  </a>
-                ))}
-              </div>
-            )
-          }
-        </div>
-      </header>
+        </header>
 
-      <article class="post-content font-body">
-        <Content />
-      </article>
+        {showOutline && <PostOutline outline={outline} variant="mobile" />}
+
+        <article class="post-content font-body">
+          <Content />
+        </article>
+      </div>
+
+      {showOutline && <PostOutline outline={outline} variant="desktop" />}
     </div>
   </section>
 </Layout>
