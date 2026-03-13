@@ -41,7 +41,6 @@
     "pagefind": "^1.4.0",
     "prettier": "^3.7.4",
     "prettier-plugin-astro": "^0.14.1",
-    "rehype-autolink-headings": "^7.1.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0"
   },

@@ -53,13 +53,21 @@ const getActivationLine = () => getHeadingOffset() + 8;
 const getMaxScrollTop = () =>
   Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
 
-const getRemainingScroll = () => getMaxScrollTop() - window.scrollY;
+const isNearDocumentEnd = () => getMaxScrollTop() - window.scrollY <= 2;
 
-const isNearDocumentEnd = () => getRemainingScroll() <= 2;
+const getLocationWithoutHash = () =>
+  `${window.location.pathname}${window.location.search}`;
 
 const hasReachedEntry = (entry: OutlineEntry) =>
   entry.heading.getBoundingClientRect().top <= getActivationLine() ||
   isNearDocumentEnd();
+
+const shouldHandleOutlineClick = (event: MouseEvent) =>
+  event.button === 0 &&
+  !event.metaKey &&
+  !event.ctrlKey &&
+  !event.shiftKey &&
+  !event.altKey;
 
 const shouldEnableDesktopOutline = () =>
   window.matchMedia(DESKTOP_BREAKPOINT_QUERY).matches &&
@@ -158,6 +166,8 @@ const mountPostOutlineRuntime = () => {
     });
   };
 
+  const getDisplayedEntry = () => hoveredEntry ?? lockedEntry ?? activeEntry;
+
   const clearNavigationLock = () => {
     lockedEntry = null;
     if (!navigationLockTimeoutId) return;
@@ -166,14 +176,39 @@ const mountPostOutlineRuntime = () => {
     navigationLockTimeoutId = 0;
   };
 
+  const scheduleSyncActiveEntry = () => {
+    if (syncFrameId) return;
+
+    syncFrameId = requestAnimationFrame(() => {
+      syncFrameId = 0;
+      syncActiveEntry();
+    });
+  };
+
   const lockNavigationToEntry = (entry: OutlineEntry) => {
     clearNavigationLock();
     lockedEntry = entry;
+
     navigationLockTimeoutId = window.setTimeout(() => {
       navigationLockTimeoutId = 0;
       lockedEntry = null;
       scheduleSyncActiveEntry();
     }, NAVIGATION_LOCK_TIMEOUT_MS);
+  };
+
+  const scrollToEntry = (entry: OutlineEntry) => {
+    const targetTop = Math.min(
+      Math.max(
+        0,
+        window.scrollY + entry.heading.getBoundingClientRect().top - getHeadingOffset()
+      ),
+      getMaxScrollTop()
+    );
+
+    window.scrollTo({
+      top: targetTop,
+      behavior: "smooth",
+    });
   };
 
   const renderIndicator = (entry: OutlineEntry | null) => {
@@ -202,58 +237,52 @@ const mountPostOutlineRuntime = () => {
     });
   };
 
+  const syncIndicatorToCurrentEntry = () => {
+    scheduleIndicator(getDisplayedEntry());
+  };
+
   const syncActiveEntry = () => {
     if (lockedEntry) {
+      // Keep the indicator pinned to the clicked target during smooth-scroll.
       if (!hasReachedEntry(lockedEntry)) {
         setActiveState(lockedEntry);
-        scheduleIndicator(lockedEntry);
+        syncIndicatorToCurrentEntry();
         return;
       }
 
       clearNavigationLock();
     }
 
-    const nextActive = pickActiveEntry(entries);
-    setActiveState(nextActive);
-    scheduleIndicator(hoveredEntry ?? nextActive);
-  };
-
-  const scheduleSyncActiveEntry = () => {
-    if (syncFrameId) return;
-
-    syncFrameId = requestAnimationFrame(() => {
-      syncFrameId = 0;
-      syncActiveEntry();
-    });
+    setActiveState(pickActiveEntry(entries));
+    syncIndicatorToCurrentEntry();
   };
 
   const linkCleanup = entries.flatMap(entry => {
-    const handleMouseEnter = () => {
+    const handleIntentStart = () => {
       if (lockedEntry) return;
       hoveredEntry = entry;
-      scheduleIndicator(entry);
+      syncIndicatorToCurrentEntry();
     };
 
-    const handleFocus = () => {
-      if (lockedEntry) return;
-      hoveredEntry = entry;
-      scheduleIndicator(entry);
-    };
+    const handleClick = (event: MouseEvent) => {
+      if (!shouldHandleOutlineClick(event)) return;
 
-    const handleClick = () => {
+      event.preventDefault();
       hoveredEntry = null;
       lockNavigationToEntry(entry);
       setActiveState(entry);
-      scheduleIndicator(entry);
+      syncIndicatorToCurrentEntry();
+      history.replaceState(history.state, "", getLocationWithoutHash());
+      scrollToEntry(entry);
     };
 
-    entry.link.addEventListener("mouseenter", handleMouseEnter);
-    entry.link.addEventListener("focus", handleFocus);
+    entry.link.addEventListener("mouseenter", handleIntentStart);
+    entry.link.addEventListener("focus", handleIntentStart);
     entry.link.addEventListener("click", handleClick);
 
     return [
-      () => entry.link.removeEventListener("mouseenter", handleMouseEnter),
-      () => entry.link.removeEventListener("focus", handleFocus),
+      () => entry.link.removeEventListener("mouseenter", handleIntentStart),
+      () => entry.link.removeEventListener("focus", handleIntentStart),
       () => entry.link.removeEventListener("click", handleClick),
     ];
   });
@@ -261,7 +290,7 @@ const mountPostOutlineRuntime = () => {
   const handleMouseLeave = () => {
     if (lockedEntry) return;
     hoveredEntry = null;
-    scheduleIndicator(activeEntry);
+    syncIndicatorToCurrentEntry();
   };
 
   const handleFocusOut = (event: FocusEvent) => {
@@ -271,7 +300,7 @@ const mountPostOutlineRuntime = () => {
     if (relatedTarget instanceof Node && nav.contains(relatedTarget)) return;
 
     hoveredEntry = null;
-    scheduleIndicator(activeEntry);
+    syncIndicatorToCurrentEntry();
   };
 
   const handleScroll = () => {
