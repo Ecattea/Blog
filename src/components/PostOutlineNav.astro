@@ -1,0 +1,21 @@
+---
+import type { PostOutlineItem } from "@/utils/postOutline";
+
+type Props = {
+  outline: PostOutlineItem[];
+};
+
+const { outline } = Astro.props;
+---
+
+<nav class="post-outline-nav" aria-label="Article outline">
+  <ol class="post-outline-list">
+    {outline.map(({ depth, slug, text }) => (
+      <li class:list={["post-outline-item", depth === 3 && "is-subitem"]}>
+        <a href={`#${slug}`} data-outline-target={slug}>
+          {text}
+        </a>
+      </li>
+    ))}
+  </ol>
+</nav>

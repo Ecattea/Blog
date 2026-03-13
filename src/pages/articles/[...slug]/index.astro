@@ -8,7 +8,7 @@ import { SITE } from "@/config";
 import { formatDisplayDate } from "@/utils/formatDate";
 import {
   getPostOutline,
-  MIN_POST_OUTLINE_ITEMS,
+  shouldShowPostOutline,
 } from "@/utils/postOutline";
 import { slugifyStr } from "@/utils/slugify";
 
@@ -60,19 +60,32 @@ const layoutProps = {
 };
 
 const publishedLabel = formatDisplayDate(pubDatetime);
-const publishedDateTime = pubDatetime.toISOString();
 const updatedDate =
   modDatetime instanceof Date && modDatetime.getTime() !== pubDatetime.getTime()
     ? modDatetime
     : undefined;
-const updatedLabel = updatedDate ? formatDisplayDate(updatedDate) : undefined;
-const updatedDateTime = updatedDate?.toISOString();
+const articleFacts = [
+  {
+    label: "Published",
+    dateTime: pubDatetime.toISOString(),
+    value: publishedLabel,
+  },
+  ...(updatedDate
+    ? [
+        {
+          label: "Updated",
+          dateTime: updatedDate.toISOString(),
+          value: formatDisplayDate(updatedDate),
+        },
+      ]
+    : []),
+];
 const tagLinks = post.data.tags.map(tag => ({
   label: tag,
   href: `/tags/${slugifyStr(tag)}/`,
 }));
 const outline = getPostOutline(headings);
-const showOutline = outline.length >= MIN_POST_OUTLINE_ITEMS;
+const showOutline = shouldShowPostOutline(outline);
 ---
 
 <Layout {...layoutProps}>
@@ -89,22 +102,14 @@ const showOutline = outline.length >= MIN_POST_OUTLINE_ITEMS;
                 Archive
               </a>
               <dl class="post-facts" aria-label="Article metadata">
-                <div class="post-fact">
-                  <dt class="post-fact-label">Published</dt>
-                  <dd class="post-fact-value">
-                    <time datetime={publishedDateTime}>{publishedLabel}</time>
-                  </dd>
-                </div>
-                {
-                  updatedLabel && updatedDateTime && (
-                    <div class="post-fact">
-                      <dt class="post-fact-label">Updated</dt>
-                      <dd class="post-fact-value">
-                        <time datetime={updatedDateTime}>{updatedLabel}</time>
-                      </dd>
-                    </div>
-                  )
-                }
+                {articleFacts.map(({ label, dateTime, value }) => (
+                  <div class="post-fact">
+                    <dt class="post-fact-label">{label}</dt>
+                    <dd class="post-fact-value">
+                      <time datetime={dateTime}>{value}</time>
+                    </dd>
+                  </div>
+                ))}
               </dl>
             </div>
             {

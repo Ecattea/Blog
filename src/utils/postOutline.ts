@@ -1,3 +1,5 @@
+import type { MarkdownHeading } from "astro";
+
 export interface PostOutlineItem {
   depth: 2 | 3;
   slug: string;
@@ -6,21 +8,15 @@ export interface PostOutlineItem {
 
 export const MIN_POST_OUTLINE_ITEMS = 3;
 
-interface OutlineHeadingLike {
-  depth: number;
-  slug: string;
-  text: string;
-}
-
 const isOutlineHeading = (
-  heading: OutlineHeadingLike
-): heading is OutlineHeadingLike & { depth: 2 | 3 } =>
+  heading: MarkdownHeading
+): heading is MarkdownHeading & { depth: 2 | 3 } =>
   (heading.depth === 2 || heading.depth === 3) &&
   heading.slug.trim().length > 0 &&
   heading.text.trim().length > 0;
 
 export const getPostOutline = (
-  headings: OutlineHeadingLike[]
+  headings: MarkdownHeading[]
 ): PostOutlineItem[] =>
   headings
     .filter(isOutlineHeading)
@@ -29,3 +25,6 @@ export const getPostOutline = (
       slug,
       text: text.trim(),
     }));
+
+export const shouldShowPostOutline = (outline: PostOutlineItem[]) =>
+  outline.length >= MIN_POST_OUTLINE_ITEMS;

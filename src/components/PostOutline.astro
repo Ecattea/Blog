@@ -1,4 +1,5 @@
 ---
+import PostOutlineNav from "@/components/PostOutlineNav.astro";
 import type { PostOutlineItem } from "@/utils/postOutline";
 
 type Props = {
@@ -8,6 +9,8 @@ type Props = {
 
 const { outline, variant } = Astro.props;
 const isMobile = variant === "mobile";
+const outlineTitle = "On this page";
+const outlineLabel = "Article outline";
 ---
 
 {
@@ -17,39 +20,19 @@ const isMobile = variant === "mobile";
       data-pagefind-ignore
       data-post-outline="mobile"
     >
-      <summary class="post-outline-summary">On this page</summary>
-      <nav class="post-outline-nav" aria-label="Article outline">
-        <ol class="post-outline-list">
-          {outline.map(({ depth, slug, text }) => (
-            <li class:list={["post-outline-item", depth === 3 && "is-subitem"]}>
-              <a href={`#${slug}`} data-outline-target={slug}>
-                {text}
-              </a>
-            </li>
-          ))}
-        </ol>
-      </nav>
+      <summary class="post-outline-summary">{outlineTitle}</summary>
+      <PostOutlineNav outline={outline} />
     </details>
   ) : (
     <aside
       class="post-outline-desktop font-ui"
       data-pagefind-ignore
       data-post-outline="desktop"
-      aria-label="Article outline"
+      aria-label={outlineLabel}
     >
       <div class="post-outline-sticky">
-        <div class="post-outline-eyebrow">On this page</div>
-        <nav class="post-outline-nav" aria-label="Article outline">
-          <ol class="post-outline-list">
-            {outline.map(({ depth, slug, text }) => (
-              <li class:list={["post-outline-item", depth === 3 && "is-subitem"]}>
-                <a href={`#${slug}`} data-outline-target={slug}>
-                  {text}
-                </a>
-              </li>
-            ))}
-          </ol>
-        </nav>
+        <div class="post-outline-eyebrow">{outlineTitle}</div>
+        <PostOutlineNav outline={outline} />
       </div>
     </aside>
   )
