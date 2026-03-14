@@ -10,6 +10,43 @@ const ACTIVE_CLASS = "is-active";
 const INDICATOR_INSET_Y = 6;
 const NAVIGATION_LOCK_TIMEOUT_MS = 1600;
 const COPY_RESET_TIMEOUT_MS = 1800;
+const CODE_LANGUAGE_LABELS: Record<string, string> = {
+  bash: "Bash",
+  c: "C",
+  cpp: "C++",
+  csharp: "C#",
+  css: "CSS",
+  diff: "Diff",
+  dockerfile: "Dockerfile",
+  go: "Go",
+  html: "HTML",
+  java: "Java",
+  javascript: "JavaScript",
+  js: "JavaScript",
+  json: "JSON",
+  jsx: "JSX",
+  kt: "Kotlin",
+  kotlin: "Kotlin",
+  markdown: "Markdown",
+  md: "Markdown",
+  php: "PHP",
+  plaintext: "Plain text",
+  py: "Python",
+  python: "Python",
+  rb: "Ruby",
+  rs: "Rust",
+  sh: "Shell",
+  shell: "Shell",
+  sql: "SQL",
+  swift: "Swift",
+  text: "Plain text",
+  ts: "TypeScript",
+  tsx: "TSX",
+  typescript: "TypeScript",
+  xml: "XML",
+  yaml: "YAML",
+  yml: "YAML",
+} as const;
 
 type Cleanup = () => void;
 
@@ -214,6 +251,35 @@ const copyTextToClipboard = async (text: string) => {
 const getCodeBlockText = (block: HTMLElement) =>
   block.querySelector("code")?.textContent ?? block.textContent ?? "";
 
+const formatCodeLanguageLabel = (rawLanguage: string) => {
+  const normalized = rawLanguage.trim().toLowerCase();
+  if (!normalized) return "";
+
+  const knownLabel = CODE_LANGUAGE_LABELS[normalized];
+  if (knownLabel) return knownLabel;
+
+  return normalized
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map(part =>
+      /^[a-z]{1,4}$/.test(part)
+        ? part.toUpperCase()
+        : `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`
+    )
+    .join(" ");
+};
+
+const getCodeLanguageLabel = (block: HTMLElement) => {
+  const rawLanguage =
+    block.dataset.language?.trim() ??
+    [...block.classList]
+      .map(token => token.match(/^language-(.+)$/)?.[1] ?? "")
+      .find(Boolean) ??
+    "";
+
+  return rawLanguage ? formatCodeLanguageLabel(rawLanguage) : "";
+};
+
 const mountReaderProgressController = (): Cleanup => {
   const queried = queryReaderProgressNodes();
   if (!queried) return () => {};
@@ -280,6 +346,10 @@ const mountCodeCopyController = (): Cleanup => {
     const wrapper = document.createElement("div");
     wrapper.className = "article-code-block";
     wrapper.dataset.copyState = "idle";
+    const languageLabel = getCodeLanguageLabel(block);
+    if (languageLabel) {
+      wrapper.dataset.codeLanguage = languageLabel;
+    }
 
     const button = document.createElement("button");
     button.type = "button";

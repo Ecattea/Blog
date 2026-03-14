@@ -107,6 +107,15 @@
   --post-code-copy-padding-inline: 0.72rem;
   --post-code-copy-font-size: 0.72rem;
   --post-code-copy-letter-spacing: 0.08em;
+  --post-code-language-top: 0.96rem;
+  --post-code-language-left: 1.22rem;
+  --post-code-language-font-size: 0.74rem;
+  --post-code-language-letter-spacing: 0.03em;
+  --post-code-language-color: color-mix(
+    in srgb,
+    var(--text-secondary) 80%,
+    var(--bg-canvas) 20%
+  );
   --post-code-copy-bg: color-mix(in srgb, #fff 88%, var(--bg-canvas) 12%);
   --post-code-copy-border: color-mix(
     in srgb,
@@ -547,6 +556,25 @@
   position: relative;
 }
 
+.article-code-block[data-code-language]::before {
+  content: attr(data-code-language);
+  position: absolute;
+  top: var(--post-code-language-top);
+  left: var(--post-code-language-left);
+  z-index: 1;
+  max-width: calc(100% - 9rem);
+  overflow: hidden;
+  color: var(--post-code-language-color);
+  font-family: "Inter", sans-serif;
+  font-size: var(--post-code-language-font-size);
+  font-weight: 500;
+  letter-spacing: var(--post-code-language-letter-spacing);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .article-code-copy {
   position: absolute;
   top: var(--post-code-copy-top);
@@ -748,6 +776,9 @@
     --post-code-copy-padding-inline: 0.52rem;
     --post-code-copy-font-size: 0.63rem;
     --post-code-copy-letter-spacing: 0.09em;
+    --post-code-language-top: 0.84rem;
+    --post-code-language-left: 1rem;
+    --post-code-language-font-size: 0.67rem;
     --post-code-copy-bg: color-mix(in srgb, #fff 93%, var(--bg-canvas) 7%);
     --post-code-copy-border: color-mix(
       in srgb,
