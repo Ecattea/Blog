@@ -5,6 +5,7 @@ import {
   getCodeLanguagePickerLabel,
   resolveCodeLanguageId,
   resolveCodeLanguagePickerId,
+  sortCodeLanguagePickerOptions,
   type CodeLanguagePickerOption,
 } from "@/utils/codeLanguage";
 
@@ -48,6 +49,7 @@ interface CodeLanguagePickerNodes {
   trigger: HTMLButtonElement;
   triggerLabel: HTMLSpanElement;
   panel: HTMLDivElement;
+  scrollArea: HTMLDivElement;
   options: CodeLanguagePickerOptionNode[];
 }
 
@@ -308,12 +310,14 @@ const createCodeLanguagePickerOptions = (
   }
 
   return [
-    {
-      id: selectedLanguageId,
-      label:
-        selectedLanguageLabel || getCodeLanguagePickerLabel(selectedLanguageId),
-    },
-    ...codeLanguagePickerOptions,
+    ...sortCodeLanguagePickerOptions([
+      {
+        id: selectedLanguageId,
+        label:
+          selectedLanguageLabel || getCodeLanguagePickerLabel(selectedLanguageId),
+      },
+      ...codeLanguagePickerOptions,
+    ]),
   ];
 };
 
@@ -375,7 +379,7 @@ const createCodeLanguagePicker = (
   container.appendChild(trigger);
   container.appendChild(panel);
 
-  return { container, trigger, triggerLabel, panel, options };
+  return { container, trigger, triggerLabel, panel, scrollArea, options };
 };
 
 const createCodeCopyButton = () => {
@@ -462,6 +466,27 @@ const setActiveCodeLanguagePickerOption = (
   }
 
   return nextOption;
+};
+
+const alignCodeLanguagePickerSelectionToTop = (
+  entry: CodeBlockEntry,
+  languageId: string
+) => {
+  const nextOption = getCodeLanguagePickerOption(entry, languageId);
+  if (!nextOption) return;
+
+  const { scrollArea } = entry.picker;
+  const topInset = parseCssLength(getComputedStyle(scrollArea).paddingTop);
+  const maxScrollTop = Math.max(
+    0,
+    scrollArea.scrollHeight - scrollArea.clientHeight
+  );
+
+  scrollArea.scrollTop = clamp(
+    nextOption.element.offsetTop - topInset + 1,
+    0,
+    maxScrollTop
+  );
 };
 
 const setCodeLanguagePickerExpanded = (
@@ -572,6 +597,12 @@ const mountCodeBlockController = (): Cleanup => {
       entry.currentLanguageId,
       focusSelectedOption
     );
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (openPickerEntry !== entry) return;
+        alignCodeLanguagePickerSelectionToTop(entry, entry.currentLanguageId);
+      });
+    });
   };
 
   const stepCodeLanguagePickerOption = (

@@ -113,6 +113,7 @@
   --post-code-language-left: 1.22rem;
   --post-code-language-font-size: 0.74rem;
   --post-code-language-letter-spacing: 0.03em;
+  --post-code-language-max-width-offset: 9rem;
   --post-code-language-color: color-mix(
     in srgb,
     var(--text-secondary) 80%,
@@ -121,6 +122,7 @@
   --post-code-picker-min-height: 1.8rem;
   --post-code-picker-trigger-padding-inline-start: 0.62rem;
   --post-code-picker-trigger-padding-inline-end: 1.62rem;
+  --post-code-picker-max-width-offset: 9.75rem;
   --post-code-picker-hover-bg: color-mix(
     in srgb,
     #fff 86%,
@@ -142,12 +144,12 @@
   --post-code-picker-panel-min-inline-size: 12.5rem;
   --post-code-picker-panel-max-inline-size: 15.75rem;
   --post-code-picker-panel-max-block-size: 15rem;
-  --post-code-picker-panel-padding: 0.42rem;
+  --post-code-picker-panel-padding: 0.5rem;
   --post-code-picker-panel-radius: 16px;
   --post-code-picker-panel-bg: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.96) 0%,
-    color-mix(in srgb, #fff 84%, var(--bg-canvas) 16%) 100%
+      rgba(255, 255, 255, 0.96) 0%,
+      color-mix(in srgb, #fff 84%, var(--bg-canvas) 16%) 100%
   );
   --post-code-picker-panel-border: color-mix(
     in srgb,
@@ -161,30 +163,18 @@
   --post-code-picker-option-min-height: 2.1rem;
   --post-code-picker-option-padding-inline-start: 1.8rem;
   --post-code-picker-option-padding-inline-end: 0.82rem;
-  --post-code-picker-option-hover-bg: color-mix(
-    in srgb,
-    #fff 66%,
-    var(--bg-canvas) 34%
-  );
-  --post-code-picker-option-active-bg: color-mix(
-    in srgb,
-    #fff 72%,
-    var(--accent-color) 9%
-  );
-  --post-code-picker-option-selected-bg: color-mix(
-    in srgb,
-    #fff 62%,
-    var(--accent-color) 14%
-  );
+  --post-code-picker-option-hover-bg: rgba(28, 25, 23, 0.04);
+  --post-code-picker-option-active-bg: rgba(28, 25, 23, 0.055);
+  --post-code-picker-option-selected-bg: rgba(28, 25, 23, 0.075);
   --post-code-picker-option-selected-color: color-mix(
     in srgb,
-    var(--text-primary) 88%,
-    var(--accent-color) 12%
+    var(--text-primary) 90%,
+    var(--text-secondary) 10%
   );
   --post-code-picker-option-check-color: color-mix(
     in srgb,
-    var(--text-primary) 72%,
-    var(--accent-color) 28%
+    var(--text-primary) 80%,
+    var(--text-secondary) 20%
   );
   --post-code-copy-bg: color-mix(in srgb, #fff 88%, var(--bg-canvas) 12%);
   --post-code-copy-border: color-mix(
@@ -653,7 +643,7 @@
   top: var(--post-code-language-top);
   left: var(--post-code-language-left);
   z-index: 1;
-  max-width: calc(100% - 9rem);
+  max-width: calc(100% - var(--post-code-language-max-width-offset));
   overflow: hidden;
   color: var(--post-code-language-color);
   font-family: "Inter", sans-serif;
@@ -678,7 +668,7 @@
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  max-width: calc(100% - 9.75rem);
+  max-width: calc(100% - var(--post-code-picker-max-width-offset));
 }
 
 .article-code-language-trigger {
@@ -750,11 +740,6 @@
   outline: none;
 }
 
-.article-code-block[data-language-picker-open="true"]
-  .article-code-language-trigger::after {
-  transform: translateY(-34%) rotate(225deg);
-}
-
 .article-code-block[data-language-picker-state="loading"]
   .article-code-language-picker {
   opacity: 0.82;
@@ -789,6 +774,7 @@
 }
 
 .article-code-language-popover-scroll {
+  position: relative;
   max-block-size: var(--post-code-picker-panel-max-block-size);
   overflow-x: hidden;
   overflow-y: auto;
@@ -1081,23 +1067,25 @@
       0 10px 18px -18px rgba(28, 25, 23, 0.22),
       inset 0 1px 0 rgba(255, 255, 255, 0.4);
     --article-reader-progress-blur: 10px;
-    --post-code-copy-top: 0.68rem;
-    --post-code-copy-right: 0.72rem;
-    --post-code-copy-min-height: 1.62rem;
-    --post-code-copy-min-width: 3.78rem;
-    --post-code-copy-padding-inline: 0.52rem;
-    --post-code-copy-font-size: 0.63rem;
-    --post-code-copy-letter-spacing: 0.09em;
-    --post-code-language-top: 0.84rem;
+    --post-code-copy-top: 0.72rem;
+    --post-code-copy-right: 0.7rem;
+    --post-code-copy-min-height: 1.58rem;
+    --post-code-copy-min-width: 3.22rem;
+    --post-code-copy-padding-inline: 0.42rem;
+    --post-code-copy-font-size: 0.58rem;
+    --post-code-copy-letter-spacing: 0.04em;
+    --post-code-language-top: 0.82rem;
     --post-code-language-left: 1rem;
     --post-code-language-font-size: 0.67rem;
-    --post-code-picker-min-height: 1.62rem;
-    --post-code-picker-trigger-padding-inline-start: 0.52rem;
-    --post-code-picker-trigger-padding-inline-end: 1.42rem;
+    --post-code-language-max-width-offset: 6.65rem;
+    --post-code-picker-min-height: 1.58rem;
+    --post-code-picker-trigger-padding-inline-start: 0.48rem;
+    --post-code-picker-trigger-padding-inline-end: 1.48rem;
+    --post-code-picker-max-width-offset: 6.55rem;
     --post-code-picker-panel-min-inline-size: 11.75rem;
     --post-code-picker-panel-max-inline-size: min(15rem, calc(100vw - 2.5rem));
     --post-code-picker-panel-max-block-size: 12.75rem;
-    --post-code-picker-panel-padding: 0.34rem;
+    --post-code-picker-panel-padding: 0.42rem;
     --post-code-picker-option-min-height: 1.92rem;
     --post-code-picker-option-padding-inline-start: 1.55rem;
     --post-code-picker-option-padding-inline-end: 0.72rem;
@@ -1151,6 +1139,16 @@
 
   .article-code-block > :is(pre, .astro-code) {
     padding-top: 2.72rem;
+  }
+
+  .article-code-language-trigger::after {
+    right: 0.58rem;
+    width: 0.42rem;
+    height: 0.42rem;
+  }
+
+  .article-code-copy {
+    text-transform: none;
   }
 
   .post-content pre code,

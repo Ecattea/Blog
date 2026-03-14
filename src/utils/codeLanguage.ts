@@ -88,7 +88,7 @@ export interface CodeLanguagePickerOption {
   label: string;
 }
 
-const CODE_LANGUAGE_PICKER_OPTIONS: CodeLanguagePickerOption[] = [
+const CODE_LANGUAGE_PICKER_BASE_OPTIONS: CodeLanguagePickerOption[] = [
   { id: "plaintext", label: "Plain text" },
   { id: "typescript", label: "TypeScript" },
   { id: "tsx", label: "TSX" },
@@ -116,6 +116,33 @@ const CODE_LANGUAGE_PICKER_OPTIONS: CodeLanguagePickerOption[] = [
   { id: "dockerfile", label: "Dockerfile" },
   { id: "diff", label: "Diff" },
 ];
+
+const codeLanguagePickerOptionComparator = (
+  a: CodeLanguagePickerOption,
+  b: CodeLanguagePickerOption
+) =>
+  a.label.localeCompare(b.label, undefined, { sensitivity: "base" }) ||
+  a.label.localeCompare(b.label) ||
+  a.id.localeCompare(b.id);
+
+export const sortCodeLanguagePickerOptions = <
+  T extends CodeLanguagePickerOption,
+>(
+  options: T[]
+) => {
+  const plainTextOption = options.find(option => option.id === "plaintext");
+  const remainingOptions = options
+    .filter(option => option.id !== "plaintext")
+    .sort(codeLanguagePickerOptionComparator);
+
+  return plainTextOption
+    ? [plainTextOption, ...remainingOptions]
+    : remainingOptions;
+};
+
+const CODE_LANGUAGE_PICKER_OPTIONS = sortCodeLanguagePickerOptions(
+  CODE_LANGUAGE_PICKER_BASE_OPTIONS
+);
 
 const CODE_LANGUAGE_PICKER_LABELS = Object.fromEntries(
   CODE_LANGUAGE_PICKER_OPTIONS.map(option => [option.id, option.label])
