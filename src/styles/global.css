@@ -453,6 +453,30 @@ h1.hero-title {
 #post {
   --post-title-gap: 1rem;
   --post-header-stack-gap: 2.75rem;
+  --article-reader-progress-width: min(var(--article-width), calc(100vw - 2rem));
+  --article-reader-progress-top: calc(env(safe-area-inset-top) + 0.9rem);
+  --article-reader-progress-height: 0.45rem;
+  --article-reader-progress-padding: 1px;
+  --article-reader-progress-track: color-mix(
+    in srgb,
+    var(--bg-canvas) 74%,
+    #fff 26%
+  );
+  --article-reader-progress-border: color-mix(
+    in srgb,
+    var(--border-subtle) 82%,
+    #fff 18%
+  );
+  --article-reader-progress-fill: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--text-primary) 80%, #fff 20%) 0%,
+    color-mix(in srgb, var(--accent-color) 34%, var(--text-primary) 66%) 100%
+  );
+  --article-reader-progress-shadow:
+    0 12px 24px -20px rgba(28, 25, 23, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.72);
+  --article-reader-progress-blur: 14px;
+  --article-reader-progress-transition: transform 140ms linear;
   --post-meta-panel-gap: 1rem;
   --post-meta-panel-padding-top: 1rem;
   --post-meta-panel-padding-inline-start: 1.1rem;
@@ -529,6 +553,36 @@ h1.hero-title {
 
 .post-main {
   min-width: 0;
+}
+
+.article-reader-progress {
+  position: fixed;
+  inset-block-start: var(--article-reader-progress-top);
+  inset-inline-start: 50%;
+  z-index: 40;
+  pointer-events: none;
+  width: var(--article-reader-progress-width);
+  height: var(--article-reader-progress-height);
+  padding: var(--article-reader-progress-padding);
+  border: 1px solid var(--article-reader-progress-border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--article-reader-progress-track);
+  box-shadow: var(--article-reader-progress-shadow);
+  backdrop-filter: blur(var(--article-reader-progress-blur));
+  -webkit-backdrop-filter: blur(var(--article-reader-progress-blur));
+  transform: translateX(-50%);
+}
+
+.article-reader-progress-bar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background: var(--article-reader-progress-fill);
+  border-radius: inherit;
+  transition: var(--article-reader-progress-transition);
 }
 
 .post-title {
@@ -1204,6 +1258,31 @@ figure {
 
 /* --- Responsive adaptations --- */
 @media (max-width: 768px) {
+  #post {
+    --article-reader-progress-width: calc(100vw - 4rem);
+    --article-reader-progress-top: calc(env(safe-area-inset-top) + 1.35rem);
+    --article-reader-progress-height: 0.38rem;
+    --article-reader-progress-track: color-mix(
+      in srgb,
+      var(--bg-canvas) 82%,
+      var(--border-subtle) 18%
+    );
+    --article-reader-progress-border: color-mix(
+      in srgb,
+      var(--border-subtle) 62%,
+      var(--bg-canvas) 38%
+    );
+    --article-reader-progress-fill: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--text-primary) 78%, #fff 22%) 0%,
+      color-mix(in srgb, var(--accent-color) 22%, var(--text-primary) 78%) 100%
+    );
+    --article-reader-progress-shadow:
+      0 10px 18px -18px rgba(28, 25, 23, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    --article-reader-progress-blur: 10px;
+  }
+
   h1.hero-title {
     font-size: 15vw;
   }
@@ -1245,7 +1324,6 @@ figure {
   .post-outline-mobile {
     display: block;
   }
-
   .dock {
     padding: 0 1.5rem;
     gap: 1.5rem;
@@ -1275,7 +1353,8 @@ figure {
   }
 
   .post-outline-indicator,
-  .post-outline-link::before {
+  .post-outline-link::before,
+  .article-reader-progress-bar {
     transition: none;
   }
 

@@ -1,6 +1,10 @@
 const DESKTOP_BREAKPOINT_QUERY = "(min-width: 960px)";
 const HOVER_POINTER_QUERY = "(hover: hover)";
 const DESKTOP_OUTLINE_SELECTOR = '[data-post-outline="desktop"]';
+const POST_ROOT_SELECTOR = "#post";
+const ARTICLE_CONTENT_SELECTOR = `${POST_ROOT_SELECTOR} .post-content`;
+const READER_PROGRESS_SELECTOR = "[data-reader-progress]";
+const READER_PROGRESS_FILL_SELECTOR = "[data-reader-progress-fill]";
 const ACTIVE_CLASS = "is-active";
 const INDICATOR_INSET_Y = 6;
 const NAVIGATION_LOCK_TIMEOUT_MS = 1600;
@@ -12,12 +16,26 @@ interface OutlineEntry {
   link: HTMLAnchorElement;
 }
 
+interface DesktopOutlineNodes {
+  indicator: HTMLElement;
+  nav: HTMLElement;
+  entries: OutlineEntry[];
+}
+
+interface ReaderProgressNodes {
+  article: HTMLElement;
+  fill: HTMLElement;
+}
+
 declare global {
   interface Window {
-    __postOutlineRuntimeAttached?: boolean;
-    __postOutlineRuntimeCleanup?: Cleanup | null;
+    __articleReaderRuntimeAttached?: boolean;
+    __articleReaderRuntimeCleanup?: Cleanup | null;
   }
 }
+
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
 
 const parseCssLength = (value: string) => {
   const trimmed = value.trim();
@@ -37,8 +55,10 @@ const parseCssLength = (value: string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const getPostRoot = () => document.querySelector<HTMLElement>(POST_ROOT_SELECTOR);
+
 const getHeadingOffset = () => {
-  const postRoot = document.querySelector<HTMLElement>("#post");
+  const postRoot = getPostRoot();
   if (!postRoot) return 104;
 
   const rawValue = getComputedStyle(postRoot).getPropertyValue(
@@ -57,6 +77,9 @@ const isNearDocumentEnd = () => getMaxScrollTop() - window.scrollY <= 2;
 
 const getLocationWithoutHash = () =>
   `${window.location.pathname}${window.location.search}`;
+
+const getAbsoluteTop = (element: HTMLElement) =>
+  window.scrollY + element.getBoundingClientRect().top;
 
 const hasReachedEntry = (entry: OutlineEntry) =>
   entry.heading.getBoundingClientRect().top <= getActivationLine() ||
@@ -90,11 +113,21 @@ const onMediaChange = (
 };
 
 const cleanupMountedRuntime = () => {
-  window.__postOutlineRuntimeCleanup?.();
-  window.__postOutlineRuntimeCleanup = null;
+  window.__articleReaderRuntimeCleanup?.();
+  window.__articleReaderRuntimeCleanup = null;
 };
 
-const queryOutlineEntries = () => {
+const queryReaderProgressNodes = (): ReaderProgressNodes | null => {
+  const article = document.querySelector<HTMLElement>(ARTICLE_CONTENT_SELECTOR);
+  const root = document.querySelector<HTMLElement>(READER_PROGRESS_SELECTOR);
+  const fill = root?.querySelector<HTMLElement>(READER_PROGRESS_FILL_SELECTOR);
+
+  if (!article || !root || !fill) return null;
+
+  return { article, fill };
+};
+
+const queryDesktopOutlineNodes = (): DesktopOutlineNodes | null => {
   if (!shouldEnableDesktopOutline()) return null;
 
   const root = document.querySelector<HTMLElement>(DESKTOP_OUTLINE_SELECTOR);
@@ -145,11 +178,71 @@ const pickActiveEntry = (entries: OutlineEntry[]) => {
   return activeEntry;
 };
 
-const mountPostOutlineRuntime = () => {
-  cleanupMountedRuntime();
+const getReaderProgress = (article: HTMLElement) => {
+  const articleTop = getAbsoluteTop(article);
+  const articleHeight = article.getBoundingClientRect().height;
+  const start = Math.max(0, articleTop - getHeadingOffset());
+  const end = Math.max(
+    start + 1,
+    articleTop + articleHeight - window.innerHeight + getHeadingOffset()
+  );
 
-  const queried = queryOutlineEntries();
-  if (!queried) return;
+  return clamp((window.scrollY - start) / (end - start), 0, 1);
+};
+
+const mountReaderProgressController = (): Cleanup => {
+  const queried = queryReaderProgressNodes();
+  if (!queried) return () => {};
+
+  const { article, fill } = queried;
+  let frameId = 0;
+  let resizeObserver: ResizeObserver | null = null;
+
+  const renderProgress = () => {
+    fill.style.transform = `scaleX(${getReaderProgress(article).toFixed(4)})`;
+  };
+
+  const scheduleProgress = () => {
+    if (frameId) return;
+
+    frameId = requestAnimationFrame(() => {
+      frameId = 0;
+      renderProgress();
+    });
+  };
+
+  const handleScroll = () => {
+    scheduleProgress();
+  };
+
+  const handleResize = () => {
+    scheduleProgress();
+  };
+
+  if (typeof ResizeObserver !== "undefined") {
+    resizeObserver = new ResizeObserver(() => {
+      scheduleProgress();
+    });
+    resizeObserver.observe(article);
+  }
+
+  window.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("resize", handleResize, { passive: true });
+
+  renderProgress();
+
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+    window.removeEventListener("resize", handleResize);
+    resizeObserver?.disconnect();
+    if (frameId) cancelAnimationFrame(frameId);
+    fill.style.transform = "scaleX(0)";
+  };
+};
+
+const mountDesktopOutlineController = (): Cleanup => {
+  const queried = queryDesktopOutlineNodes();
+  if (!queried) return () => {};
 
   const { indicator, nav, entries } = queried;
   let activeEntry = pickActiveEntry(entries);
@@ -243,7 +336,6 @@ const mountPostOutlineRuntime = () => {
 
   const syncActiveEntry = () => {
     if (lockedEntry) {
-      // Keep the indicator pinned to the clicked target during smooth-scroll.
       if (!hasReachedEntry(lockedEntry)) {
         setActiveState(lockedEntry);
         syncIndicatorToCurrentEntry();
@@ -324,7 +416,7 @@ const mountPostOutlineRuntime = () => {
   setActiveState(activeEntry);
   renderIndicator(activeEntry);
 
-  window.__postOutlineRuntimeCleanup = () => {
+  return () => {
     clearNavigationLock();
     nav.removeEventListener("mouseleave", handleMouseLeave);
     nav.removeEventListener("focusout", handleFocusOut);
@@ -339,21 +431,34 @@ const mountPostOutlineRuntime = () => {
   };
 };
 
-export function initPostOutlineRuntime() {
+const mountArticleReaderRuntime = () => {
+  cleanupMountedRuntime();
+
+  const cleanups = [
+    mountReaderProgressController(),
+    mountDesktopOutlineController(),
+  ];
+
+  window.__articleReaderRuntimeCleanup = () => {
+    cleanups.forEach(cleanup => cleanup());
+  };
+};
+
+export function initArticleReaderRuntime() {
   if (typeof window === "undefined") return;
 
-  mountPostOutlineRuntime();
+  mountArticleReaderRuntime();
 
-  if (window.__postOutlineRuntimeAttached) return;
+  if (window.__articleReaderRuntimeAttached) return;
 
-  window.__postOutlineRuntimeAttached = true;
+  window.__articleReaderRuntimeAttached = true;
   document.addEventListener("astro:after-swap", () => {
-    mountPostOutlineRuntime();
+    mountArticleReaderRuntime();
   });
   onMediaChange(window.matchMedia(DESKTOP_BREAKPOINT_QUERY), () => {
-    mountPostOutlineRuntime();
+    mountArticleReaderRuntime();
   });
   onMediaChange(window.matchMedia(HOVER_POINTER_QUERY), () => {
-    mountPostOutlineRuntime();
+    mountArticleReaderRuntime();
   });
 }

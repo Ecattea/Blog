@@ -12,6 +12,7 @@ Demo-inspired multi-page blog built with Astro.
 | Articles list         | `src/pages/articles/[...page].astro`        | `/articles/` (paginated)                      |
 | Article detail        | `src/pages/articles/[...slug]/index.astro`  | `/articles/<slug>/`                           |
 | Article OG image      | `src/pages/articles/[...slug]/index.png.ts` | `/articles/<slug>/index.png`                  |
+| Article reader runtime| `src/scripts/articleReaderRuntime.ts`       | Article-only progress + desktop TOC behavior  |
 | Site OG image         | `src/pages/og.png.ts`                       | `/og.png`                                     |
 | About                 | `src/pages/about/index.astro`               | `/about/`                                     |
 | Tags                  | `src/pages/tags/index.astro`                | `/tags/`                                      |

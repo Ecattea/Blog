@@ -90,6 +90,13 @@ const showOutline = shouldShowPostOutline(outline);
 
 <Layout {...layoutProps}>
   <section id="post">
+    <div class="article-reader-progress" data-reader-progress aria-hidden="true">
+      <span
+        class="article-reader-progress-bar"
+        data-reader-progress-fill
+      ></span>
+    </div>
+
     <div class:list={["post-shell", showOutline && "post-shell-with-outline"]}>
       <div class="post-main" data-pagefind-body>
         <header class="post-header">
@@ -137,12 +144,8 @@ const showOutline = shouldShowPostOutline(outline);
     </div>
   </section>
 
-  {
-    showOutline && (
-      <script>
-        import { initPostOutlineRuntime } from "@/scripts/postOutlineRuntime";
-        initPostOutlineRuntime();
-      </script>
-    )
-  }
+  <script>
+    import { initArticleReaderRuntime } from "@/scripts/articleReaderRuntime";
+    initArticleReaderRuntime();
+  </script>
 </Layout>
