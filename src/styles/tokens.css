@@ -1,39 +1,141 @@
-/* Design tokens (from demo.html) */
 :root {
-  /* Palette: Warm Stone Theme */
-  --bg-canvas: #fafaf9; /* Warm Paper */
-  --bg-card: rgba(255, 255, 255, 0.5); /* Glassy Card Base */
-  --bg-card-hover: #ffffff; /* Solid White on Hover */
+  /* Semantic palette */
+  --color-bg-canvas: #fafaf9;
+  --color-bg-surface: rgba(255, 255, 255, 0.5);
+  --color-bg-surface-elevated: #ffffff;
+  --color-text-primary: #1c1917;
+  --color-text-secondary: #57534e;
+  --color-text-body: #292524;
+  --color-accent-primary: #2563eb;
+  --color-border-subtle: rgba(231, 229, 228, 0.6);
+  --color-border-strong: rgba(231, 229, 228, 1);
+  --color-glass-dock: rgba(250, 250, 249, 0.85);
+  --color-border-dock: rgba(231, 229, 228, 0.9);
 
-  --text-primary: #1c1917; /* Warm Charcoal */
-  --text-secondary: #57534e; /* Warm Grey */
-  --text-body: #292524; /* Deep Grey for reading */
-
-  --accent-color: #2563eb; /* Electric Blue */
-
-  --border-subtle: rgba(231, 229, 228, 0.6);
-  --border-focus: rgba(231, 229, 228, 1);
-
-  --dock-glass: rgba(250, 250, 249, 0.85);
-  --dock-border: rgba(231, 229, 228, 0.9);
+  /* Legacy aliases */
+  --bg-canvas: var(--color-bg-canvas);
+  --bg-card: var(--color-bg-surface);
+  --bg-card-hover: var(--color-bg-surface-elevated);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-body: var(--color-text-body);
+  --accent-color: var(--color-accent-primary);
+  --border-subtle: var(--color-border-subtle);
+  --border-focus: var(--color-border-strong);
+  --dock-glass: var(--color-glass-dock);
+  --dock-border: var(--color-border-dock);
 
   /* Spacing & Layout */
   --page-width: 1400px;
-  --article-width: 840px; /* Optimized for readability */
+  --article-width: 840px;
+
+  /* Typography roles */
+  --type-display-hero-size: clamp(4rem, 11vw, 9rem);
+  --type-display-hero-line-height: 0.95;
+  --type-display-hero-letter-spacing: -0.03em;
+  --type-display-hero-weight: 600;
+
+  --type-display-feature-size: clamp(2.2rem, 5vw, 3.5rem);
+  --type-display-feature-line-height: 1.1;
+  --type-display-feature-weight: 400;
+
+  --type-display-page-size: clamp(2.8rem, 5vw, 4.2rem);
+  --type-display-page-line-height: 1.05;
+  --type-display-page-letter-spacing: -0.02em;
+  --type-display-page-weight: 600;
+
+  --type-title-card-size: 2.5rem;
+  --type-title-card-line-height: 1.1;
+  --type-title-card-weight: 600;
+
+  --type-title-section-size: 2.4rem;
+  --type-title-section-line-height: 1.1;
+  --type-title-section-weight: 500;
+
+  --type-title-supporting-size: 2rem;
+  --type-title-supporting-line-height: 1.15;
+  --type-title-supporting-weight: 500;
+
+  --type-body-reading-size: 1.18rem;
+  --type-body-reading-line-height: 1.82;
+
+  --type-body-large-size: 1.24rem;
+  --type-body-large-line-height: 1.72;
+
+  --type-body-supporting-size: 1.08rem;
+  --type-body-supporting-line-height: 1.68;
+
+  --type-meta-size: 0.9rem;
+  --type-meta-line-height: 1.5;
+  --type-meta-weight: 500;
+
+  --type-label-size: 0.85rem;
+  --type-label-line-height: 1.4;
+  --type-label-letter-spacing: 0.1em;
+  --type-label-weight: 500;
+
+  --type-label-compact-size: 0.72rem;
+  --type-label-compact-line-height: 1.4;
+  --type-label-compact-letter-spacing: 0.12em;
+  --type-label-compact-weight: 500;
+
+  --type-caption-size: 0.88rem;
+  --type-caption-line-height: 1.65;
+
+  --type-outline-size: 0.875rem;
+  --type-outline-line-height: 1.35;
+  --type-outline-weight: 500;
+  --type-outline-subitem-size: 0.8125rem;
+  --type-outline-subitem-weight: 400;
+  --type-outline-eyebrow-size: 0.8125rem;
+  --type-outline-eyebrow-weight: 400;
+
+  --type-reading-h2-size: 1.9rem;
+  --type-reading-h2-line-height: 1.16;
+  --type-reading-h2-letter-spacing: -0.02em;
+  --type-reading-h2-weight: 600;
+
+  --type-reading-h3-size: 1.42rem;
+  --type-reading-h3-line-height: 1.16;
+  --type-reading-h3-weight: 600;
+
+  --type-reading-h4-size: 1.08rem;
+  --type-reading-h4-line-height: 1.16;
+  --type-reading-h4-letter-spacing: 0.04em;
+  --type-reading-h4-weight: 600;
 
   /* Transitions */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-elastic: cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+@media (max-width: 768px) {
+  :root {
+    --type-title-card-size: 1.8rem;
+    --type-title-card-line-height: 1.15;
+    --type-body-reading-size: 1.08rem;
+    --type-body-reading-line-height: 1.86;
+    --type-body-large-size: 1.12rem;
+    --type-body-large-line-height: 1.74;
+    --type-body-supporting-size: 1.02rem;
+    --type-body-supporting-line-height: 1.7;
+    --type-reading-h2-size: 1.72rem;
+    --type-reading-h3-size: 1.28rem;
+    --type-reading-h4-size: 0.98rem;
+    --type-caption-size: 0.83rem;
+  }
+}
+
 /* Utility Classes for Fonts */
 .font-ui {
   font-family: "Inter", sans-serif;
 }
+
 .font-display {
   font-family: "Playfair Display", serif;
   font-variant-numeric: lining-nums proportional-nums;
 }
+
 .font-body {
   font-family: "Source Serif 4", serif;
 }
