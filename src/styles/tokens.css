@@ -68,6 +68,7 @@
   --type-meta-size: 0.9rem;
   --type-meta-line-height: 1.5;
   --type-meta-weight: 500;
+  --type-meta-dense-size: 0.87rem;
 
   --type-label-size: 0.85rem;
   --type-label-line-height: 1.4;
@@ -78,6 +79,7 @@
   --type-label-compact-line-height: 1.4;
   --type-label-compact-letter-spacing: 0.12em;
   --type-label-compact-weight: 500;
+  --type-label-dense-size: 0.67rem;
 
   --type-caption-size: 0.88rem;
   --type-caption-line-height: 1.65;
