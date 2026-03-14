@@ -5,9 +5,11 @@ const POST_ROOT_SELECTOR = "#post";
 const ARTICLE_CONTENT_SELECTOR = `${POST_ROOT_SELECTOR} .post-content`;
 const READER_PROGRESS_SELECTOR = "[data-reader-progress]";
 const READER_PROGRESS_FILL_SELECTOR = "[data-reader-progress-fill]";
+const CODE_BLOCK_SELECTOR = "pre, .astro-code";
 const ACTIVE_CLASS = "is-active";
 const INDICATOR_INSET_Y = 6;
 const NAVIGATION_LOCK_TIMEOUT_MS = 1600;
+const COPY_RESET_TIMEOUT_MS = 1800;
 
 type Cleanup = () => void;
 
@@ -25,6 +27,12 @@ interface DesktopOutlineNodes {
 interface ReaderProgressNodes {
   article: HTMLElement;
   fill: HTMLElement;
+}
+
+interface CodeCopyEntry {
+  wrapper: HTMLDivElement;
+  block: HTMLElement;
+  button: HTMLButtonElement;
 }
 
 declare global {
@@ -127,6 +135,15 @@ const queryReaderProgressNodes = (): ReaderProgressNodes | null => {
   return { article, fill };
 };
 
+const queryCodeBlocks = () => {
+  const article = document.querySelector<HTMLElement>(ARTICLE_CONTENT_SELECTOR);
+  if (!article) return [];
+
+  return [...article.querySelectorAll<HTMLElement>(CODE_BLOCK_SELECTOR)].filter(
+    (block, index, blocks) => blocks.indexOf(block) === index
+  );
+};
+
 const queryDesktopOutlineNodes = (): DesktopOutlineNodes | null => {
   if (!shouldEnableDesktopOutline()) return null;
 
@@ -190,6 +207,13 @@ const getReaderProgress = (article: HTMLElement) => {
   return clamp((window.scrollY - start) / (end - start), 0, 1);
 };
 
+const copyTextToClipboard = async (text: string) => {
+  await navigator.clipboard.writeText(text);
+};
+
+const getCodeBlockText = (block: HTMLElement) =>
+  block.querySelector("code")?.textContent ?? block.textContent ?? "";
+
 const mountReaderProgressController = (): Cleanup => {
   const queried = queryReaderProgressNodes();
   if (!queried) return () => {};
@@ -237,6 +261,90 @@ const mountReaderProgressController = (): Cleanup => {
     resizeObserver?.disconnect();
     if (frameId) cancelAnimationFrame(frameId);
     fill.style.transform = "scaleX(0)";
+  };
+};
+
+const mountCodeCopyController = (): Cleanup => {
+  if (!navigator.clipboard?.writeText) return () => {};
+
+  const codeBlocks = queryCodeBlocks();
+  if (codeBlocks.length === 0) return () => {};
+
+  const entries: CodeCopyEntry[] = [];
+  const cleanups: Cleanup[] = [];
+
+  codeBlocks.forEach(block => {
+    const parent = block.parentElement;
+    if (!parent) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "article-code-block";
+    wrapper.dataset.copyState = "idle";
+
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "article-code-copy font-ui";
+    button.setAttribute("aria-label", "Copy code block");
+    button.textContent = "Copy";
+
+    parent.insertBefore(wrapper, block);
+    wrapper.appendChild(block);
+    wrapper.appendChild(button);
+
+    entries.push({ wrapper, block, button });
+  });
+
+  entries.forEach(({ wrapper, block, button }) => {
+    let resetTimeoutId = 0;
+
+    const resetButtonState = () => {
+      wrapper.dataset.copyState = "idle";
+      button.textContent = "Copy";
+      button.removeAttribute("disabled");
+    };
+
+    const scheduleReset = () => {
+      if (resetTimeoutId) window.clearTimeout(resetTimeoutId);
+      resetTimeoutId = window.setTimeout(() => {
+        resetTimeoutId = 0;
+        resetButtonState();
+      }, COPY_RESET_TIMEOUT_MS);
+    };
+
+    const handleClick = async () => {
+      const text = getCodeBlockText(block);
+      if (!text.trim()) return;
+
+      button.setAttribute("disabled", "true");
+
+      try {
+        await copyTextToClipboard(text);
+        wrapper.dataset.copyState = "copied";
+        button.textContent = "Copied";
+      } catch {
+        wrapper.dataset.copyState = "error";
+        button.textContent = "Failed";
+      } finally {
+        button.removeAttribute("disabled");
+        scheduleReset();
+      }
+    };
+
+    button.addEventListener("click", handleClick);
+
+    cleanups.push(() => {
+      button.removeEventListener("click", handleClick);
+      if (resetTimeoutId) window.clearTimeout(resetTimeoutId);
+      const hostParent = wrapper.parentElement;
+      if (hostParent) {
+        hostParent.insertBefore(block, wrapper);
+        wrapper.remove();
+      }
+    });
+  });
+
+  return () => {
+    cleanups.forEach(cleanup => cleanup());
   };
 };
 
@@ -436,6 +544,7 @@ const mountArticleReaderRuntime = () => {
 
   const cleanups = [
     mountReaderProgressController(),
+    mountCodeCopyController(),
     mountDesktopOutlineController(),
   ];
 
