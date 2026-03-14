@@ -1,4 +1,11 @@
-import { formatCodeLanguageLabel } from "@/utils/codeLanguage";
+import { highlightArticleCode } from "@/scripts/articleCodeHighlighter";
+import {
+  codeLanguagePickerOptions,
+  formatCodeLanguageLabel,
+  getCodeLanguagePickerLabel,
+  resolveCodeLanguageId,
+  resolveCodeLanguagePickerId,
+} from "@/utils/codeLanguage";
 
 const DESKTOP_BREAKPOINT_QUERY = "(min-width: 960px)";
 const HOVER_POINTER_QUERY = "(hover: hover)";
@@ -31,10 +38,15 @@ interface ReaderProgressNodes {
   fill: HTMLElement;
 }
 
-interface CodeCopyEntry {
+interface CodeBlockEntry {
   wrapper: HTMLDivElement;
+  button: HTMLButtonElement | null;
+  picker: HTMLSelectElement;
   block: HTMLElement;
-  button: HTMLButtonElement;
+  sourceText: string;
+  defaultLanguageId: string;
+  currentLanguageId: string;
+  defaultMarkup: string;
 }
 
 declare global {
@@ -224,6 +236,97 @@ const getDeclaredCodeLanguage = (block: HTMLElement) =>
 const getCodeLanguageLabel = (block: HTMLElement) =>
   formatCodeLanguageLabel(getDeclaredCodeLanguage(block));
 
+const setCodeLanguageLabel = (
+  wrapper: HTMLDivElement,
+  languageId: string,
+  fallbackLabel = ""
+) => {
+  const nextLabel = getCodeLanguagePickerLabel(languageId) || fallbackLabel;
+
+  if (nextLabel) {
+    wrapper.dataset.codeLanguage = nextLabel;
+    return;
+  }
+
+  delete wrapper.dataset.codeLanguage;
+};
+
+const createCodeLanguagePicker = (
+  selectedLanguageId: string,
+  selectedLanguageLabel = ""
+) => {
+  const container = document.createElement("div");
+  container.className = "article-code-language-picker font-ui";
+
+  const picker = document.createElement("select");
+  picker.className = "article-code-language-select";
+  picker.setAttribute("aria-label", "Change code language");
+
+  const hasSelectedLanguageOption = codeLanguagePickerOptions.some(
+    option => option.id === selectedLanguageId
+  );
+
+  if (selectedLanguageId && !hasSelectedLanguageOption) {
+    const initialOption = document.createElement("option");
+    initialOption.value = selectedLanguageId;
+    initialOption.textContent =
+      selectedLanguageLabel || getCodeLanguagePickerLabel(selectedLanguageId);
+    picker.appendChild(initialOption);
+  }
+
+  codeLanguagePickerOptions.forEach(({ id, label }) => {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = label;
+    picker.appendChild(option);
+  });
+
+  picker.value = selectedLanguageId;
+  container.appendChild(picker);
+
+  return { container, picker };
+};
+
+const createCodeCopyButton = () => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "article-code-copy font-ui";
+  button.setAttribute("aria-label", "Copy code block");
+  button.textContent = "Copy";
+  return button;
+};
+
+const createCodeBlockFromHtml = (html: string) => {
+  const template = document.createElement("template");
+  template.innerHTML = html.trim();
+
+  const nextBlock = template.content.firstElementChild;
+  return nextBlock instanceof HTMLElement ? nextBlock : null;
+};
+
+const createHighlightedCodeBlock = async (
+  code: string,
+  languageId: string
+) => {
+  const nextBlock = createCodeBlockFromHtml(
+    await highlightArticleCode(code, languageId)
+  );
+  if (!nextBlock) {
+    throw new Error("Unable to render highlighted code block");
+  }
+
+  nextBlock.classList.add("astro-code");
+  nextBlock.dataset.language = languageId;
+  nextBlock.style.removeProperty("background-color");
+
+  return nextBlock;
+};
+
+const replaceCodeBlock = (entry: CodeBlockEntry, nextBlock: HTMLElement) => {
+  entry.block.replaceWith(nextBlock);
+  entry.block = nextBlock;
+};
+
 const mountReaderProgressController = (): Cleanup => {
   const queried = queryReaderProgressNodes();
   if (!queried) return () => {};
@@ -274,44 +377,68 @@ const mountReaderProgressController = (): Cleanup => {
   };
 };
 
-const mountCodeCopyController = (): Cleanup => {
-  if (!navigator.clipboard?.writeText) return () => {};
-
+const mountCodeBlockController = (): Cleanup => {
   const codeBlocks = queryCodeBlocks();
   if (codeBlocks.length === 0) return () => {};
 
-  const entries: CodeCopyEntry[] = [];
+  const canCopyCodeBlocks = Boolean(navigator.clipboard?.writeText);
+  const entries: CodeBlockEntry[] = [];
   const cleanups: Cleanup[] = [];
 
   codeBlocks.forEach(block => {
     const parent = block.parentElement;
     if (!parent) return;
 
+    const sourceText = getCodeBlockText(block);
+    if (!sourceText.trim()) return;
+
     const wrapper = document.createElement("div");
     wrapper.className = "article-code-block";
     wrapper.dataset.copyState = "idle";
-    const languageLabel = getCodeLanguageLabel(block);
-    if (languageLabel) {
-      wrapper.dataset.codeLanguage = languageLabel;
-    }
-
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "article-code-copy font-ui";
-    button.setAttribute("aria-label", "Copy code block");
-    button.textContent = "Copy";
+    wrapper.dataset.languagePickerAttached = "true";
+    const declaredLanguageLabel = getCodeLanguageLabel(block);
+    const declaredLanguageId = getDeclaredCodeLanguage(block);
+    const normalizedDeclaredLanguageId =
+      resolveCodeLanguageId(declaredLanguageId) ||
+      declaredLanguageId.trim().toLowerCase();
+    const resolvedPickerLanguageId =
+      resolveCodeLanguagePickerId(declaredLanguageId);
+    const defaultLanguageId =
+      resolvedPickerLanguageId === "plaintext" && normalizedDeclaredLanguageId
+        ? normalizedDeclaredLanguageId
+        : resolvedPickerLanguageId;
+    const { container, picker } = createCodeLanguagePicker(
+      defaultLanguageId,
+      declaredLanguageLabel
+    );
+    setCodeLanguageLabel(wrapper, defaultLanguageId, declaredLanguageLabel);
+    const button = canCopyCodeBlocks ? createCodeCopyButton() : null;
 
     parent.insertBefore(wrapper, block);
     wrapper.appendChild(block);
-    wrapper.appendChild(button);
+    wrapper.appendChild(container);
+    if (button) {
+      wrapper.appendChild(button);
+    }
 
-    entries.push({ wrapper, block, button });
+    entries.push({
+      wrapper,
+      button,
+      picker,
+      block,
+      sourceText,
+      defaultLanguageId,
+      currentLanguageId: defaultLanguageId,
+      defaultMarkup: block.outerHTML,
+    });
   });
 
-  entries.forEach(({ wrapper, block, button }) => {
+  entries.forEach(entry => {
+    const { wrapper, button, picker } = entry;
     let resetTimeoutId = 0;
 
     const resetButtonState = () => {
+      if (!button) return;
       wrapper.dataset.copyState = "idle";
       button.textContent = "Copy";
       button.removeAttribute("disabled");
@@ -326,13 +453,11 @@ const mountCodeCopyController = (): Cleanup => {
     };
 
     const handleClick = async () => {
-      const text = getCodeBlockText(block);
-      if (!text.trim()) return;
-
+      if (!button) return;
       button.setAttribute("disabled", "true");
 
       try {
-        await copyTextToClipboard(text);
+        await copyTextToClipboard(entry.sourceText);
         wrapper.dataset.copyState = "copied";
         button.textContent = "Copied";
       } catch {
@@ -344,14 +469,49 @@ const mountCodeCopyController = (): Cleanup => {
       }
     };
 
-    button.addEventListener("click", handleClick);
+    const handleLanguageChange = async () => {
+      const nextLanguageId = picker.value;
+      if (nextLanguageId === entry.currentLanguageId) return;
+
+      const previousLanguageId = entry.currentLanguageId;
+      picker.setAttribute("disabled", "true");
+      wrapper.dataset.languagePickerState = "loading";
+
+      try {
+        const nextBlock =
+          nextLanguageId === entry.defaultLanguageId
+            ? createCodeBlockFromHtml(entry.defaultMarkup)
+            : await createHighlightedCodeBlock(entry.sourceText, nextLanguageId);
+
+        if (!nextBlock) {
+          throw new Error("Unable to create next code block state");
+        }
+
+        replaceCodeBlock(entry, nextBlock);
+        entry.currentLanguageId = nextLanguageId;
+        setCodeLanguageLabel(wrapper, nextLanguageId);
+      } catch {
+        picker.value = previousLanguageId;
+      } finally {
+        delete wrapper.dataset.languagePickerState;
+        picker.removeAttribute("disabled");
+      }
+    };
+
+    if (button) {
+      button.addEventListener("click", handleClick);
+    }
+    picker.addEventListener("change", handleLanguageChange);
 
     cleanups.push(() => {
-      button.removeEventListener("click", handleClick);
+      if (button) {
+        button.removeEventListener("click", handleClick);
+      }
+      picker.removeEventListener("change", handleLanguageChange);
       if (resetTimeoutId) window.clearTimeout(resetTimeoutId);
       const hostParent = wrapper.parentElement;
       if (hostParent) {
-        hostParent.insertBefore(block, wrapper);
+        hostParent.insertBefore(entry.block, wrapper);
         wrapper.remove();
       }
     });
@@ -558,7 +718,7 @@ const mountArticleReaderRuntime = () => {
 
   const cleanups = [
     mountReaderProgressController(),
-    mountCodeCopyController(),
+    mountCodeBlockController(),
     mountDesktopOutlineController(),
   ];
 
