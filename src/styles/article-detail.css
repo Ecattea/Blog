@@ -102,9 +102,9 @@
   );
   --post-code-copy-top: 0.75rem;
   --post-code-copy-right: 0.8rem;
-  --post-code-copy-min-height: 1.9rem;
+  --post-code-copy-min-height: 1.8rem;
   --post-code-copy-min-width: 4.75rem;
-  --post-code-copy-padding-inline: 0.72rem;
+  --post-code-copy-padding-inline: 0.65rem;
   --post-code-copy-font-size: 0.72rem;
   --post-code-copy-letter-spacing: 0.08em;
   --post-code-language-top: 0.96rem;
@@ -688,12 +688,12 @@
 .article-code-language-trigger::after {
   content: "";
   position: absolute;
-  right: 0.72rem;
+  right: 0.65rem;
   top: 50%;
-  width: 0.4rem;
-  height: 0.4rem;
-  border-right: 1.5px solid currentColor;
-  border-bottom: 1.5px solid currentColor;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 1.75px solid currentColor;
+  border-bottom: 1.75px solid currentColor;
   color: var(--post-code-picker-chevron-color);
   pointer-events: none;
   transform: translateY(-62%) rotate(45deg);
