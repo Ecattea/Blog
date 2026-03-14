@@ -526,16 +526,52 @@ h1.hero-title {
   color: var(--color-text-body);
 }
 
-.about-note-block {
+.about-meta {
   margin-top: 3rem;
-  padding-top: 2rem;
+  padding-top: 1.6rem;
   border-top: 1px solid var(--border-subtle);
 }
 
-.about-note {
+.about-meta-list {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.about-meta-row {
+  display: grid;
+  grid-template-columns: minmax(0, 6.75rem) minmax(0, 1fr);
+  gap: 0.25rem 1rem;
+  align-items: baseline;
+}
+
+.about-meta-row dt,
+.about-meta-row dd {
+  margin: 0;
+}
+
+.about-meta-row dt {
+  font-size: var(--type-label-size);
+  line-height: var(--type-label-line-height);
+  font-weight: var(--type-label-weight);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: color-mix(
+    in srgb,
+    var(--color-text-secondary) 74%,
+    var(--color-bg-canvas) 26%
+  );
+}
+
+.about-meta-row dd {
   font-size: var(--type-caption-size);
   line-height: var(--type-caption-line-height);
-  color: var(--color-text-secondary);
+  color: color-mix(
+    in srgb,
+    var(--color-text-secondary) 86%,
+    var(--color-bg-canvas) 14%
+  );
+  max-width: 28rem;
 }
 
 .image-card-wrapper {
@@ -774,6 +810,15 @@ h1.hero-title {
 
   .article-card {
     padding: 1.5rem;
+  }
+
+  .about-meta {
+    padding-top: 1.4rem;
+  }
+
+  .about-meta-row {
+    grid-template-columns: 1fr;
+    gap: 0.12rem;
   }
 
   .dock {
