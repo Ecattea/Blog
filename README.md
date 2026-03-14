@@ -92,6 +92,28 @@ Common optional fields:
 - `modDatetime`
 - `canonicalURL`
 
+### Structure notes
+
+- The article page already renders the post title as the page-level `h1`, so body content should usually start at `h2`.
+- Use `h2` for main article sections.
+- Use `h3` for subsection structure under those sections.
+- Only `h2` and `h3` headings feed the article outline.
+- A body-level `h1` is not part of the current article outline contract.
+- The article outline appears only when a post has at least `3` qualifying `h2`/`h3` headings.
+
+### Reader-facing article metadata
+
+- `tags` render as article-page chips and link to their tag pages.
+- Use `modDatetime` only when the article has been meaningfully updated.
+- If `modDatetime` is omitted or matches `pubDatetime`, the article page does not show an `Updated` field.
+
+### Behavior notes
+
+- On desktop, the article outline renders as a side-rail TOC.
+- On mobile, the article outline renders as a collapsed `On this page` block.
+- Article headings keep stable ids for outline targeting and section navigation.
+- Visible inline `#` heading anchors are intentionally not rendered in article content.
+
 This repository is optimized for personal use. Local validation stays lightweight, and production confidence comes from `pnpm run validate:release` plus deployment-time build checks.
 
 ## Deploy (Cloudflare Workers static assets)
