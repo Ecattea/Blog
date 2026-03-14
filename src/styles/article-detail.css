@@ -163,8 +163,7 @@
   --post-code-picker-option-min-height: 2.1rem;
   --post-code-picker-option-padding-inline-start: 1.8rem;
   --post-code-picker-option-padding-inline-end: 0.82rem;
-  --post-code-picker-option-hover-bg: rgba(28, 25, 23, 0.04);
-  --post-code-picker-option-active-bg: rgba(28, 25, 23, 0.055);
+  --post-code-picker-option-active-bg: rgba(28, 25, 23, 0.075);
   --post-code-picker-option-selected-bg: rgba(28, 25, 23, 0.075);
   --post-code-picker-option-selected-color: color-mix(
     in srgb,
@@ -775,6 +774,10 @@
 
 .article-code-language-popover-scroll {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.24rem;
   max-block-size: var(--post-code-picker-panel-max-block-size);
   overflow-x: hidden;
   overflow-y: auto;
@@ -798,19 +801,26 @@
 
 .article-code-language-option {
   position: relative;
+  flex: 0 0 auto;
+  align-self: stretch;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  inline-size: 100%;
   min-height: var(--post-code-picker-option-min-height);
+  box-sizing: border-box;
+  border: 0;
   border-radius: 11px;
+  background: transparent;
   padding: 0.45rem var(--post-code-picker-option-padding-inline-end) 0.45rem
     var(--post-code-picker-option-padding-inline-start);
   color: var(--text-secondary);
   cursor: pointer;
   outline: none;
+  text-align: left;
   transition:
     background-color 0.16s ease,
-    color 0.16s ease,
-    transform 0.16s ease;
+    color 0.16s ease;
 }
 
 .article-code-language-option::before {
@@ -841,11 +851,7 @@
 .article-code-language-option:is(:hover, :focus-visible),
 .article-code-language-option[data-active="true"] {
   background: var(--post-code-picker-option-active-bg);
-  color: var(--text-primary);
-}
-
-.article-code-language-option:hover {
-  transform: translateX(1px);
+  color: var(--post-code-picker-option-selected-color);
 }
 
 .article-code-language-option[aria-selected="true"] {
@@ -856,15 +862,6 @@
 .article-code-language-option[aria-selected="true"]::before {
   opacity: 1;
   transform: translateY(-62%) rotate(45deg) scale(1);
-}
-
-.article-code-language-option:is(:hover, :focus-visible)[aria-selected="true"],
-.article-code-language-option[data-active="true"][aria-selected="true"] {
-  background: color-mix(
-    in srgb,
-    var(--post-code-picker-option-selected-bg) 82%,
-    #fff 18%
-  );
 }
 
 .article-code-copy {
