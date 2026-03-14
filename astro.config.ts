@@ -10,6 +10,7 @@ import {
 } from "@shikijs/transformers";
 
 import { SITE } from "./src/config";
+import { codeLanguageShikiAliases } from "./src/utils/codeLanguage";
 
 // https://astro.build/config
 export default defineConfig({
@@ -26,6 +27,7 @@ export default defineConfig({
       // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "night-owl" },
       defaultColor: false,
+      langAlias: codeLanguageShikiAliases,
       wrap: false,
       transformers: [
         transformerNotationHighlight(),

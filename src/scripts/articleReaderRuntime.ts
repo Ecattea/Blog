@@ -1,3 +1,5 @@
+import { formatCodeLanguageLabel } from "@/utils/codeLanguage";
+
 const DESKTOP_BREAKPOINT_QUERY = "(min-width: 960px)";
 const HOVER_POINTER_QUERY = "(hover: hover)";
 const DESKTOP_OUTLINE_SELECTOR = '[data-post-outline="desktop"]';
@@ -10,43 +12,6 @@ const ACTIVE_CLASS = "is-active";
 const INDICATOR_INSET_Y = 6;
 const NAVIGATION_LOCK_TIMEOUT_MS = 1600;
 const COPY_RESET_TIMEOUT_MS = 1800;
-const CODE_LANGUAGE_LABELS: Record<string, string> = {
-  bash: "Bash",
-  c: "C",
-  cpp: "C++",
-  csharp: "C#",
-  css: "CSS",
-  diff: "Diff",
-  dockerfile: "Dockerfile",
-  go: "Go",
-  html: "HTML",
-  java: "Java",
-  javascript: "JavaScript",
-  js: "JavaScript",
-  json: "JSON",
-  jsx: "JSX",
-  kt: "Kotlin",
-  kotlin: "Kotlin",
-  markdown: "Markdown",
-  md: "Markdown",
-  php: "PHP",
-  plaintext: "Plain text",
-  py: "Python",
-  python: "Python",
-  rb: "Ruby",
-  rs: "Rust",
-  sh: "Shell",
-  shell: "Shell",
-  sql: "SQL",
-  swift: "Swift",
-  text: "Plain text",
-  ts: "TypeScript",
-  tsx: "TSX",
-  typescript: "TypeScript",
-  xml: "XML",
-  yaml: "YAML",
-  yml: "YAML",
-} as const;
 
 type Cleanup = () => void;
 
@@ -176,9 +141,7 @@ const queryCodeBlocks = () => {
   const article = document.querySelector<HTMLElement>(ARTICLE_CONTENT_SELECTOR);
   if (!article) return [];
 
-  return [...article.querySelectorAll<HTMLElement>(CODE_BLOCK_SELECTOR)].filter(
-    (block, index, blocks) => blocks.indexOf(block) === index
-  );
+  return [...article.querySelectorAll<HTMLElement>(CODE_BLOCK_SELECTOR)];
 };
 
 const queryDesktopOutlineNodes = (): DesktopOutlineNodes | null => {
@@ -251,34 +214,15 @@ const copyTextToClipboard = async (text: string) => {
 const getCodeBlockText = (block: HTMLElement) =>
   block.querySelector("code")?.textContent ?? block.textContent ?? "";
 
-const formatCodeLanguageLabel = (rawLanguage: string) => {
-  const normalized = rawLanguage.trim().toLowerCase();
-  if (!normalized) return "";
+const getDeclaredCodeLanguage = (block: HTMLElement) =>
+  block.dataset.language?.trim() ??
+  [...block.classList]
+    .find(token => token.startsWith("language-"))
+    ?.slice("language-".length) ??
+  "";
 
-  const knownLabel = CODE_LANGUAGE_LABELS[normalized];
-  if (knownLabel) return knownLabel;
-
-  return normalized
-    .split(/[-_\s]+/)
-    .filter(Boolean)
-    .map(part =>
-      /^[a-z]{1,4}$/.test(part)
-        ? part.toUpperCase()
-        : `${part[0]?.toUpperCase() ?? ""}${part.slice(1)}`
-    )
-    .join(" ");
-};
-
-const getCodeLanguageLabel = (block: HTMLElement) => {
-  const rawLanguage =
-    block.dataset.language?.trim() ??
-    [...block.classList]
-      .map(token => token.match(/^language-(.+)$/)?.[1] ?? "")
-      .find(Boolean) ??
-    "";
-
-  return rawLanguage ? formatCodeLanguageLabel(rawLanguage) : "";
-};
+const getCodeLanguageLabel = (block: HTMLElement) =>
+  formatCodeLanguageLabel(getDeclaredCodeLanguage(block));
 
 const mountReaderProgressController = (): Cleanup => {
   const queried = queryReaderProgressNodes();

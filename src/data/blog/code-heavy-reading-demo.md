@@ -17,7 +17,7 @@ Code articles usually fail when every element fights for the same amount of visu
 
 Even a short explanation can feel abrupt if it runs straight into a large block. The block needs enough perimeter and a readable measure, especially when a line like `const canonicalPath = getPath(post.id, post.filePath, true)` forces horizontal scrolling on small screens.
 
-```ts
+```typescript
 export const createReaderSnapshot = (postId: string, viewportWidth: number) => {
   const canonicalPath = `/articles/${postId}/?preview=reader-experience&viewport=${viewportWidth}&mode=code-heavy-layout-validation`;
 
@@ -44,7 +44,7 @@ export const createReaderSnapshot = (postId: string, viewportWidth: number) => {
 
 On mobile, a code block that scrolls sideways is acceptable. A whole page that scrolls sideways is not. That means the scroller has to live inside the block, with touch-friendly padding and enough contrast that the code still feels anchored to the article.
 
-```bash
+```shell
 pnpm run build && pnpm run preview -- --host 127.0.0.1 --port 4328 && curl "https://example.com/articles/code-heavy-reading-demo/?viewport=390&behavior=progress-bar-and-outline-regression-check"
 ```
 

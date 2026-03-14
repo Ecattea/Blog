@@ -705,6 +705,14 @@
   line-height: 1.68;
 }
 
+.post-content .astro-code,
+.post-content .astro-code span {
+  color: var(--shiki-light, inherit);
+  font-style: var(--shiki-light-font-style, inherit);
+  font-weight: var(--shiki-light-font-weight, inherit);
+  text-decoration: var(--shiki-light-text-decoration, inherit);
+}
+
 .post-content blockquote {
   border: 1px solid var(--post-paper-border);
   padding: 0.95rem 1.15rem;
