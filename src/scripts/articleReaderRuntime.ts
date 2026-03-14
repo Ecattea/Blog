@@ -5,6 +5,7 @@ import {
   getCodeLanguagePickerLabel,
   resolveCodeLanguageId,
   resolveCodeLanguagePickerId,
+  type CodeLanguagePickerOption,
 } from "@/utils/codeLanguage";
 
 const DESKTOP_BREAKPOINT_QUERY = "(min-width: 960px)";
@@ -38,10 +39,22 @@ interface ReaderProgressNodes {
   fill: HTMLElement;
 }
 
+interface CodeLanguagePickerOptionNode extends CodeLanguagePickerOption {
+  element: HTMLDivElement;
+}
+
+interface CodeLanguagePickerNodes {
+  container: HTMLDivElement;
+  trigger: HTMLButtonElement;
+  triggerLabel: HTMLSpanElement;
+  panel: HTMLDivElement;
+  options: CodeLanguagePickerOptionNode[];
+}
+
 interface CodeBlockEntry {
   wrapper: HTMLDivElement;
   button: HTMLButtonElement | null;
-  picker: HTMLSelectElement;
+  picker: CodeLanguagePickerNodes;
   block: HTMLElement;
   sourceText: string;
   defaultLanguageId: string;
@@ -251,40 +264,87 @@ const setCodeLanguageLabel = (
   delete wrapper.dataset.codeLanguage;
 };
 
-const createCodeLanguagePicker = (
+const createCodeLanguagePickerOptions = (
   selectedLanguageId: string,
   selectedLanguageLabel = ""
 ) => {
+  if (!selectedLanguageId) {
+    return [...codeLanguagePickerOptions];
+  }
+
+  if (codeLanguagePickerOptions.some(option => option.id === selectedLanguageId)) {
+    return [...codeLanguagePickerOptions];
+  }
+
+  return [
+    {
+      id: selectedLanguageId,
+      label:
+        selectedLanguageLabel || getCodeLanguagePickerLabel(selectedLanguageId),
+    },
+    ...codeLanguagePickerOptions,
+  ];
+};
+
+const createCodeLanguagePicker = (
+  selectedLanguageId: string,
+  selectedLanguageLabel = "",
+  pickerId: string
+) => {
+  const pickerOptions = createCodeLanguagePickerOptions(
+    selectedLanguageId,
+    selectedLanguageLabel
+  );
   const container = document.createElement("div");
   container.className = "article-code-language-picker font-ui";
 
-  const picker = document.createElement("select");
-  picker.className = "article-code-language-select";
-  picker.setAttribute("aria-label", "Change code language");
+  const trigger = document.createElement("button");
+  trigger.type = "button";
+  trigger.className = "article-code-language-trigger";
+  trigger.id = `${pickerId}-trigger`;
+  trigger.setAttribute("aria-haspopup", "listbox");
+  trigger.setAttribute("aria-expanded", "false");
+  trigger.setAttribute("aria-controls", pickerId);
+  trigger.setAttribute("aria-label", "Change code language");
 
-  const hasSelectedLanguageOption = codeLanguagePickerOptions.some(
-    option => option.id === selectedLanguageId
-  );
+  const triggerLabel = document.createElement("span");
+  triggerLabel.className = "article-code-language-trigger-label";
+  trigger.appendChild(triggerLabel);
 
-  if (selectedLanguageId && !hasSelectedLanguageOption) {
-    const initialOption = document.createElement("option");
-    initialOption.value = selectedLanguageId;
-    initialOption.textContent =
-      selectedLanguageLabel || getCodeLanguagePickerLabel(selectedLanguageId);
-    picker.appendChild(initialOption);
-  }
+  const panel = document.createElement("div");
+  panel.className = "article-code-language-popover";
+  panel.id = pickerId;
+  panel.hidden = true;
+  panel.setAttribute("role", "listbox");
+  panel.setAttribute("aria-labelledby", trigger.id);
 
-  codeLanguagePickerOptions.forEach(({ id, label }) => {
-    const option = document.createElement("option");
-    option.value = id;
-    option.textContent = label;
-    picker.appendChild(option);
+  const scrollArea = document.createElement("div");
+  scrollArea.className = "article-code-language-popover-scroll";
+  panel.appendChild(scrollArea);
+
+  const options = pickerOptions.map(({ id, label }, index) => {
+    const option = document.createElement("div");
+    option.className = "article-code-language-option";
+    option.id = `${pickerId}-option-${index + 1}`;
+    option.tabIndex = -1;
+    option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", "false");
+    option.dataset.languageOptionId = id;
+
+    const optionLabel = document.createElement("span");
+    optionLabel.className = "article-code-language-option-label";
+    optionLabel.textContent = label;
+    option.appendChild(optionLabel);
+
+    scrollArea.appendChild(option);
+
+    return { id, label, element: option };
   });
 
-  picker.value = selectedLanguageId;
-  container.appendChild(picker);
+  container.appendChild(trigger);
+  container.appendChild(panel);
 
-  return { container, picker };
+  return { container, trigger, triggerLabel, panel, options };
 };
 
 const createCodeCopyButton = () => {
@@ -325,6 +385,70 @@ const createHighlightedCodeBlock = async (
 const replaceCodeBlock = (entry: CodeBlockEntry, nextBlock: HTMLElement) => {
   entry.block.replaceWith(nextBlock);
   entry.block = nextBlock;
+};
+
+const getCodeLanguagePickerOption = (
+  entry: CodeBlockEntry,
+  languageId: string
+) =>
+  entry.picker.options.find(option => option.id === languageId) ??
+  entry.picker.options[0] ??
+  null;
+
+const syncCodeLanguagePickerSelection = (
+  entry: CodeBlockEntry,
+  languageId: string
+) => {
+  const nextOption = getCodeLanguagePickerOption(entry, languageId);
+  const nextLabel =
+    nextOption?.label ?? getCodeLanguagePickerLabel(languageId) ?? "";
+
+  entry.picker.triggerLabel.textContent = nextLabel;
+  setCodeLanguageLabel(entry.wrapper, languageId, nextLabel);
+
+  entry.picker.options.forEach(option => {
+    option.element.setAttribute(
+      "aria-selected",
+      String(option.id === languageId)
+    );
+  });
+};
+
+const setActiveCodeLanguagePickerOption = (
+  entry: CodeBlockEntry,
+  languageId: string,
+  shouldFocus = false
+) => {
+  const nextOption = getCodeLanguagePickerOption(entry, languageId);
+  if (!nextOption) return null;
+
+  entry.picker.options.forEach(option => {
+    const isActive = option.id === nextOption.id;
+    option.element.dataset.active = isActive ? "true" : "false";
+    option.element.tabIndex = isActive ? 0 : -1;
+  });
+
+  if (shouldFocus) {
+    nextOption.element.focus({ preventScroll: true });
+    nextOption.element.scrollIntoView({ block: "nearest" });
+  }
+
+  return nextOption;
+};
+
+const setCodeLanguagePickerExpanded = (
+  entry: CodeBlockEntry,
+  isExpanded: boolean
+) => {
+  entry.picker.trigger.setAttribute("aria-expanded", String(isExpanded));
+  entry.picker.panel.hidden = !isExpanded;
+
+  if (isExpanded) {
+    entry.wrapper.dataset.languagePickerOpen = "true";
+    return;
+  }
+
+  delete entry.wrapper.dataset.languagePickerOpen;
 };
 
 const mountReaderProgressController = (): Cleanup => {
@@ -384,6 +508,88 @@ const mountCodeBlockController = (): Cleanup => {
   const canCopyCodeBlocks = Boolean(navigator.clipboard?.writeText);
   const entries: CodeBlockEntry[] = [];
   const cleanups: Cleanup[] = [];
+  let openPickerEntry: CodeBlockEntry | null = null;
+  let pickerId = 0;
+
+  const closeCodeLanguagePicker = (
+    entry: CodeBlockEntry,
+    restoreFocus = false
+  ) => {
+    if (openPickerEntry === entry) {
+      openPickerEntry = null;
+    }
+
+    setCodeLanguagePickerExpanded(entry, false);
+    setActiveCodeLanguagePickerOption(entry, entry.currentLanguageId);
+
+    if (restoreFocus) {
+      entry.picker.trigger.focus();
+    }
+  };
+
+  const openCodeLanguagePicker = (
+    entry: CodeBlockEntry,
+    focusSelectedOption = true
+  ) => {
+    if (entry.picker.trigger.disabled) return;
+
+    if (openPickerEntry && openPickerEntry !== entry) {
+      closeCodeLanguagePicker(openPickerEntry);
+    }
+
+    openPickerEntry = entry;
+    setCodeLanguagePickerExpanded(entry, true);
+    setActiveCodeLanguagePickerOption(
+      entry,
+      entry.currentLanguageId,
+      focusSelectedOption
+    );
+  };
+
+  const stepCodeLanguagePickerOption = (
+    entry: CodeBlockEntry,
+    currentLanguageId: string,
+    direction: 1 | -1
+  ) => {
+    const currentIndex = entry.picker.options.findIndex(
+      option => option.id === currentLanguageId
+    );
+    const resolvedIndex = currentIndex < 0 ? 0 : currentIndex;
+    const nextIndex =
+      (resolvedIndex + direction + entry.picker.options.length) %
+      entry.picker.options.length;
+    const nextOption = entry.picker.options[nextIndex];
+    if (!nextOption) return;
+
+    setActiveCodeLanguagePickerOption(entry, nextOption.id, true);
+  };
+
+  const pickFirstCodeLanguageOption = (entry: CodeBlockEntry) => {
+    const nextOption = entry.picker.options[0];
+    if (!nextOption) return;
+
+    setActiveCodeLanguagePickerOption(entry, nextOption.id, true);
+  };
+
+  const pickLastCodeLanguageOption = (entry: CodeBlockEntry) => {
+    const nextOption = entry.picker.options.at(-1);
+    if (!nextOption) return;
+
+    setActiveCodeLanguagePickerOption(entry, nextOption.id, true);
+  };
+
+  const handleDocumentPointerDown = (event: PointerEvent) => {
+    if (!openPickerEntry) return;
+
+    const target = event.target;
+    if (target instanceof Node && openPickerEntry.wrapper.contains(target)) {
+      return;
+    }
+
+    closeCodeLanguagePicker(openPickerEntry);
+  };
+
+  document.addEventListener("pointerdown", handleDocumentPointerDown);
 
   codeBlocks.forEach(block => {
     const parent = block.parentElement;
@@ -407,16 +613,17 @@ const mountCodeBlockController = (): Cleanup => {
       resolvedPickerLanguageId === "plaintext" && normalizedDeclaredLanguageId
         ? normalizedDeclaredLanguageId
         : resolvedPickerLanguageId;
-    const { container, picker } = createCodeLanguagePicker(
+    const picker = createCodeLanguagePicker(
       defaultLanguageId,
-      declaredLanguageLabel
+      declaredLanguageLabel,
+      `article-code-language-picker-${++pickerId}`
     );
     setCodeLanguageLabel(wrapper, defaultLanguageId, declaredLanguageLabel);
     const button = canCopyCodeBlocks ? createCodeCopyButton() : null;
 
     parent.insertBefore(wrapper, block);
     wrapper.appendChild(block);
-    wrapper.appendChild(container);
+    wrapper.appendChild(picker.container);
     if (button) {
       wrapper.appendChild(button);
     }
@@ -437,6 +644,9 @@ const mountCodeBlockController = (): Cleanup => {
     const { wrapper, button, picker } = entry;
     let resetTimeoutId = 0;
 
+    syncCodeLanguagePickerSelection(entry, entry.currentLanguageId);
+    setActiveCodeLanguagePickerOption(entry, entry.currentLanguageId);
+
     const resetButtonState = () => {
       if (!button) return;
       wrapper.dataset.copyState = "idle";
@@ -454,6 +664,10 @@ const mountCodeBlockController = (): Cleanup => {
 
     const handleClick = async () => {
       if (!button) return;
+      if (openPickerEntry === entry) {
+        closeCodeLanguagePicker(entry);
+      }
+
       button.setAttribute("disabled", "true");
 
       try {
@@ -469,12 +683,19 @@ const mountCodeBlockController = (): Cleanup => {
       }
     };
 
-    const handleLanguageChange = async () => {
-      const nextLanguageId = picker.value;
-      if (nextLanguageId === entry.currentLanguageId) return;
+    const handleLanguageSelection = async (nextLanguageId: string) => {
+      if (nextLanguageId === entry.currentLanguageId) {
+        closeCodeLanguagePicker(entry, true);
+        return;
+      }
 
       const previousLanguageId = entry.currentLanguageId;
-      picker.setAttribute("disabled", "true");
+      closeCodeLanguagePicker(entry);
+      entry.currentLanguageId = nextLanguageId;
+      syncCodeLanguagePickerSelection(entry, nextLanguageId);
+      setActiveCodeLanguagePickerOption(entry, nextLanguageId);
+
+      picker.trigger.disabled = true;
       wrapper.dataset.languagePickerState = "loading";
 
       try {
@@ -488,27 +709,125 @@ const mountCodeBlockController = (): Cleanup => {
         }
 
         replaceCodeBlock(entry, nextBlock);
-        entry.currentLanguageId = nextLanguageId;
-        setCodeLanguageLabel(wrapper, nextLanguageId);
       } catch {
-        picker.value = previousLanguageId;
+        entry.currentLanguageId = previousLanguageId;
+        syncCodeLanguagePickerSelection(entry, previousLanguageId);
+        setActiveCodeLanguagePickerOption(entry, previousLanguageId);
       } finally {
         delete wrapper.dataset.languagePickerState;
-        picker.removeAttribute("disabled");
+        picker.trigger.disabled = false;
+        picker.trigger.focus();
       }
     };
+
+    const handleTriggerClick = () => {
+      if (openPickerEntry === entry) {
+        closeCodeLanguagePicker(entry);
+        return;
+      }
+
+      openCodeLanguagePicker(entry);
+    };
+
+    const handleTriggerKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "ArrowDown") return;
+
+      event.preventDefault();
+      openCodeLanguagePicker(entry);
+    };
+
+    const handleWrapperFocusOut = (event: FocusEvent) => {
+      if (openPickerEntry !== entry) return;
+
+      const relatedTarget = event.relatedTarget;
+      if (relatedTarget instanceof Node && wrapper.contains(relatedTarget)) {
+        return;
+      }
+
+      closeCodeLanguagePicker(entry);
+    };
+
+    const optionCleanups = picker.options.map(option => {
+      const handleOptionClick = () => {
+        void handleLanguageSelection(option.id);
+      };
+
+      const handleOptionFocus = () => {
+        setActiveCodeLanguagePickerOption(entry, option.id);
+      };
+
+      const handleOptionKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          stepCodeLanguagePickerOption(entry, option.id, 1);
+          return;
+        }
+
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          stepCodeLanguagePickerOption(entry, option.id, -1);
+          return;
+        }
+
+        if (event.key === "Home") {
+          event.preventDefault();
+          pickFirstCodeLanguageOption(entry);
+          return;
+        }
+
+        if (event.key === "End") {
+          event.preventDefault();
+          pickLastCodeLanguageOption(entry);
+          return;
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          closeCodeLanguagePicker(entry, true);
+          return;
+        }
+
+        if (event.key === "Tab") {
+          closeCodeLanguagePicker(entry);
+          return;
+        }
+
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          void handleLanguageSelection(option.id);
+        }
+      };
+
+      option.element.addEventListener("click", handleOptionClick);
+      option.element.addEventListener("focus", handleOptionFocus);
+      option.element.addEventListener("keydown", handleOptionKeyDown);
+
+      return () => {
+        option.element.removeEventListener("click", handleOptionClick);
+        option.element.removeEventListener("focus", handleOptionFocus);
+        option.element.removeEventListener("keydown", handleOptionKeyDown);
+      };
+    });
 
     if (button) {
       button.addEventListener("click", handleClick);
     }
-    picker.addEventListener("change", handleLanguageChange);
+    picker.trigger.addEventListener("click", handleTriggerClick);
+    picker.trigger.addEventListener("keydown", handleTriggerKeyDown);
+    wrapper.addEventListener("focusout", handleWrapperFocusOut);
 
     cleanups.push(() => {
       if (button) {
         button.removeEventListener("click", handleClick);
       }
-      picker.removeEventListener("change", handleLanguageChange);
+      picker.trigger.removeEventListener("click", handleTriggerClick);
+      picker.trigger.removeEventListener("keydown", handleTriggerKeyDown);
+      wrapper.removeEventListener("focusout", handleWrapperFocusOut);
+      optionCleanups.forEach(cleanup => cleanup());
       if (resetTimeoutId) window.clearTimeout(resetTimeoutId);
+      if (openPickerEntry === entry) {
+        openPickerEntry = null;
+      }
       const hostParent = wrapper.parentElement;
       if (hostParent) {
         hostParent.insertBefore(entry.block, wrapper);
@@ -518,6 +837,7 @@ const mountCodeBlockController = (): Cleanup => {
   });
 
   return () => {
+    document.removeEventListener("pointerdown", handleDocumentPointerDown);
     cleanups.forEach(cleanup => cleanup());
   };
 };
