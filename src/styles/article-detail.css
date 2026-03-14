@@ -131,6 +131,7 @@
   padding-top: 14vh;
 }
 
+/* Layout and metadata */
 .post-shell {
   width: 100%;
   max-width: var(--article-width);
@@ -144,6 +145,7 @@
   min-width: 0;
 }
 
+/* Reader progress */
 .article-reader-progress {
   position: fixed;
   inset-block-start: var(--article-reader-progress-top);
@@ -285,6 +287,7 @@
   background: var(--post-tag-chip-hover-bg);
 }
 
+/* Outline surfaces */
 .post-outline-mobile {
   display: none;
   margin-bottom: 1.5rem;
@@ -464,6 +467,7 @@
   text-transform: none;
 }
 
+/* Article body */
 .post-content {
   color: var(--text-body);
   font-size: 1.18rem;
@@ -538,6 +542,7 @@
   color: var(--accent-color);
 }
 
+/* Code presentation */
 .article-code-block {
   position: relative;
 }
@@ -711,6 +716,7 @@
   margin: 0;
 }
 
+/* Article-specific responsive adjustments */
 @media (max-width: 768px) {
   #post {
     --article-reader-progress-width: calc(100vw - 4rem);
@@ -824,6 +830,7 @@
   }
 }
 
+/* Respect reduced motion on article-only affordances */
 @media (prefers-reduced-motion: reduce) {
   .post-outline-indicator,
   .post-outline-link::before,
@@ -832,6 +839,7 @@
   }
 }
 
+/* Desktop outline rail */
 @media (min-width: 960px) {
   #post {
     --post-title-gap: 0.55rem;
