@@ -53,6 +53,7 @@ interface CodeLanguagePickerNodes {
 
 interface CodeBlockEntry {
   wrapper: HTMLDivElement;
+  preserveWrapper: boolean;
   button: HTMLButtonElement | null;
   picker: CodeLanguagePickerNodes;
   block: HTMLElement;
@@ -90,7 +91,8 @@ const parseCssLength = (value: string) => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
-const getPostRoot = () => document.querySelector<HTMLElement>(POST_ROOT_SELECTOR);
+const getPostRoot = () =>
+  document.querySelector<HTMLElement>(POST_ROOT_SELECTOR);
 
 const getHeadingOffset = () => {
   const postRoot = getPostRoot();
@@ -249,6 +251,33 @@ const getDeclaredCodeLanguage = (block: HTMLElement) =>
 const getCodeLanguageLabel = (block: HTMLElement) =>
   formatCodeLanguageLabel(getDeclaredCodeLanguage(block));
 
+const isCodeBlockWrapper = (
+  element: Element | null
+): element is HTMLDivElement =>
+  element instanceof HTMLDivElement &&
+  element.classList.contains("article-code-block");
+
+const ensureCodeBlockWrapper = (block: HTMLElement) => {
+  const parent = block.parentElement;
+  if (isCodeBlockWrapper(parent)) {
+    if (!parent.dataset.copyState) {
+      parent.dataset.copyState = "idle";
+    }
+
+    return { wrapper: parent, preserveWrapper: true };
+  }
+
+  if (!parent) return null;
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "article-code-block";
+  wrapper.dataset.copyState = "idle";
+  parent.insertBefore(wrapper, block);
+  wrapper.appendChild(block);
+
+  return { wrapper, preserveWrapper: false };
+};
+
 const setCodeLanguageLabel = (
   wrapper: HTMLDivElement,
   languageId: string,
@@ -272,7 +301,9 @@ const createCodeLanguagePickerOptions = (
     return [...codeLanguagePickerOptions];
   }
 
-  if (codeLanguagePickerOptions.some(option => option.id === selectedLanguageId)) {
+  if (
+    codeLanguagePickerOptions.some(option => option.id === selectedLanguageId)
+  ) {
     return [...codeLanguagePickerOptions];
   }
 
@@ -364,10 +395,7 @@ const createCodeBlockFromHtml = (html: string) => {
   return nextBlock instanceof HTMLElement ? nextBlock : null;
 };
 
-const createHighlightedCodeBlock = async (
-  code: string,
-  languageId: string
-) => {
+const createHighlightedCodeBlock = async (code: string, languageId: string) => {
   const nextBlock = createCodeBlockFromHtml(
     await highlightArticleCode(code, languageId)
   );
@@ -592,15 +620,13 @@ const mountCodeBlockController = (): Cleanup => {
   document.addEventListener("pointerdown", handleDocumentPointerDown);
 
   codeBlocks.forEach(block => {
-    const parent = block.parentElement;
-    if (!parent) return;
-
     const sourceText = getCodeBlockText(block);
     if (!sourceText.trim()) return;
 
-    const wrapper = document.createElement("div");
-    wrapper.className = "article-code-block";
-    wrapper.dataset.copyState = "idle";
+    const wrapped = ensureCodeBlockWrapper(block);
+    if (!wrapped) return;
+
+    const { wrapper, preserveWrapper } = wrapped;
     wrapper.dataset.languagePickerAttached = "true";
     const declaredLanguageLabel = getCodeLanguageLabel(block);
     const declaredLanguageId = getDeclaredCodeLanguage(block);
@@ -621,8 +647,6 @@ const mountCodeBlockController = (): Cleanup => {
     setCodeLanguageLabel(wrapper, defaultLanguageId, declaredLanguageLabel);
     const button = canCopyCodeBlocks ? createCodeCopyButton() : null;
 
-    parent.insertBefore(wrapper, block);
-    wrapper.appendChild(block);
     wrapper.appendChild(picker.container);
     if (button) {
       wrapper.appendChild(button);
@@ -630,6 +654,7 @@ const mountCodeBlockController = (): Cleanup => {
 
     entries.push({
       wrapper,
+      preserveWrapper,
       button,
       picker,
       block,
@@ -702,7 +727,10 @@ const mountCodeBlockController = (): Cleanup => {
         const nextBlock =
           nextLanguageId === entry.defaultLanguageId
             ? createCodeBlockFromHtml(entry.defaultMarkup)
-            : await createHighlightedCodeBlock(entry.sourceText, nextLanguageId);
+            : await createHighlightedCodeBlock(
+                entry.sourceText,
+                nextLanguageId
+              );
 
         if (!nextBlock) {
           throw new Error("Unable to create next code block state");
@@ -828,11 +856,22 @@ const mountCodeBlockController = (): Cleanup => {
       if (openPickerEntry === entry) {
         openPickerEntry = null;
       }
-      const hostParent = wrapper.parentElement;
-      if (hostParent) {
-        hostParent.insertBefore(entry.block, wrapper);
-        wrapper.remove();
+      delete wrapper.dataset.languagePickerAttached;
+      delete wrapper.dataset.languagePickerOpen;
+      delete wrapper.dataset.languagePickerState;
+      wrapper.dataset.copyState = "idle";
+
+      if (entry.preserveWrapper) {
+        picker.container.remove();
+        button?.remove();
+        return;
       }
+
+      const hostParent = wrapper.parentElement;
+      if (!hostParent) return;
+
+      hostParent.insertBefore(entry.block, wrapper);
+      wrapper.remove();
     });
   });
 
@@ -895,7 +934,9 @@ const mountDesktopOutlineController = (): Cleanup => {
     const targetTop = Math.min(
       Math.max(
         0,
-        window.scrollY + entry.heading.getBoundingClientRect().top - getHeadingOffset()
+        window.scrollY +
+          entry.heading.getBoundingClientRect().top -
+          getHeadingOffset()
       ),
       getMaxScrollTop()
     );

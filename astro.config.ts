@@ -10,6 +10,7 @@ import {
 } from "@shikijs/transformers";
 
 import { SITE } from "./src/config";
+import { rehypeArticleCodeBlocks } from "./src/plugins/rehypeArticleCodeBlocks";
 import { codeLanguageShikiAliases } from "./src/utils/codeLanguage";
 
 // https://astro.build/config
@@ -22,7 +23,7 @@ export default defineConfig({
   ],
   markdown: {
     remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }]],
-    rehypePlugins: [rehypeHeadingIds],
+    rehypePlugins: [rehypeHeadingIds, rehypeArticleCodeBlocks],
     shikiConfig: {
       // For more themes, visit https://shiki.style/themes
       themes: { light: "min-light", dark: "night-owl" },
