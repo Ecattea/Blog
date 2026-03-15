@@ -23,7 +23,6 @@ body {
   color: var(--color-text-primary);
   font-family: "Source Serif 4", serif;
   font-synthesis: none;
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -32,11 +31,6 @@ input,
 select,
 textarea {
   font: inherit;
-}
-
-/* Hide scrollbar for clean aesthetic */
-body::-webkit-scrollbar {
-  display: none;
 }
 
 /* Focus styles (keep visible, match calm aesthetic) */
@@ -224,6 +218,12 @@ h1.hero-title {
   margin-left: 0.5rem;
 }
 
+.hero-title-subline {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--text-tertiary);
+}
+
 /* --- Apple-style 3D tilt cards --- */
 .tilt-card {
   position: relative;
@@ -283,8 +283,8 @@ h1.hero-title {
   color: inherit;
   cursor: pointer;
   transition:
-    transform 0.4s var(--ease-elastic),
-    box-shadow 0.4s var(--ease-elastic),
+    transform 0.4s var(--ease-out-expo),
+    box-shadow 0.4s var(--ease-out-expo),
     background 0.4s ease,
     border-color 0.4s ease;
 }
@@ -349,11 +349,20 @@ h1.hero-title {
   font-weight: var(--type-label-weight);
   text-transform: uppercase;
   letter-spacing: var(--type-label-letter-spacing);
-  color: var(--color-text-secondary);
+  color: var(--text-tertiary);
   border-bottom: 1px solid var(--border-subtle);
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
-  opacity: 0.8;
+}
+
+.page-header {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.page-header > .tag-title {
+  margin-bottom: 0;
 }
 
 .archive-subnav {
@@ -412,18 +421,13 @@ h1.hero-title {
   gap: 0.65rem 1rem;
   font-size: var(--type-meta-size);
   line-height: var(--type-meta-line-height);
-  color: var(--color-text-secondary);
+  color: var(--text-tertiary);
   margin-bottom: 1rem;
   font-weight: var(--type-meta-weight);
-  opacity: 0.7;
 }
 
 .article-meta time {
   font-variant-numeric: tabular-nums;
-}
-
-.article-card:hover .article-meta {
-  opacity: 1;
 }
 
 .article-title {
@@ -437,15 +441,8 @@ h1.hero-title {
 .article-excerpt {
   font-size: var(--type-body-supporting-size);
   line-height: var(--type-body-supporting-line-height);
-  color: var(--color-text-secondary);
-  opacity: 0.8;
-  max-width: 90%;
-  transition: opacity 0.3s ease;
-}
-
-.article-card:hover .article-excerpt {
-  opacity: 1;
   color: var(--text-body);
+  max-width: 90%;
 }
 
 .icon-arrow {
@@ -556,21 +553,13 @@ h1.hero-title {
   font-weight: 500;
   letter-spacing: 0;
   text-transform: none;
-  color: color-mix(
-    in srgb,
-    var(--color-text-secondary) 74%,
-    var(--color-bg-canvas) 26%
-  );
+  color: var(--text-tertiary);
 }
 
 .about-meta-row dd {
   font-size: 0.76rem;
   line-height: 1.45;
-  color: color-mix(
-    in srgb,
-    var(--color-text-secondary) 86%,
-    var(--color-bg-canvas) 14%
-  );
+  color: var(--text-secondary);
   max-width: 24rem;
 }
 
@@ -648,18 +637,23 @@ h1.hero-title {
 
 .dock-link {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   color: var(--text-secondary);
   font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
-  padding: 0.5rem 0;
-  transition: all 0.3s var(--ease-elastic);
+  padding: 0 0.2rem;
+  transition:
+    color 0.28s var(--ease-out-expo),
+    transform 0.28s var(--ease-out-expo);
   cursor: pointer;
 }
 
 .dock-link:hover {
   color: var(--text-primary);
-  transform: scale(1.1);
+  transform: translateY(-1px);
 }
 
 .dock.tilt-dock .dock-link {
@@ -668,7 +662,7 @@ h1.hero-title {
 }
 
 .dock.tilt-dock .dock-link:hover {
-  transform: translateZ(10px);
+  transform: translate3d(0, -1px, 10px);
 }
 
 .dock-link.active {
@@ -709,7 +703,7 @@ h1.hero-title {
   color: var(--text-primary);
   backdrop-filter: blur(12px);
   transition:
-    transform 0.25s var(--ease-elastic),
+    transform 0.25s var(--ease-out-expo),
     background 0.25s ease;
 }
 
@@ -731,7 +725,9 @@ h1.hero-title {
 }
 
 .tag-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
   padding: 0.25rem 0;
   text-decoration: none;
   color: var(--text-secondary);
@@ -739,7 +735,7 @@ h1.hero-title {
   transition:
     color 0.2s ease,
     border-color 0.2s ease,
-    transform 0.25s var(--ease-elastic);
+    transform 0.25s var(--ease-out-expo);
 }
 
 .tag-link:hover {
@@ -783,9 +779,22 @@ h1.hero-title {
 }
 
 .archive-count {
-  color: var(--text-secondary);
+  color: var(--text-tertiary);
   font-weight: 500;
-  opacity: 0.75;
+}
+
+.route-note {
+  color: var(--text-secondary);
+  font-size: 1.08rem;
+  line-height: 1.7;
+}
+
+.route-note-symbol {
+  font-size: 1.1rem;
+}
+
+.archive-subnav-spaced {
+  margin-top: 2rem;
 }
 
 /* --- Responsive adaptations --- */
@@ -810,6 +819,11 @@ h1.hero-title {
 
   .article-card {
     padding: 1.5rem;
+  }
+
+  .page-header {
+    gap: 0.85rem;
+    margin-bottom: 2rem;
   }
 
   .about-meta {
