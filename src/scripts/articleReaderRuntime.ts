@@ -1,4 +1,3 @@
-import { highlightArticleCode } from "@/scripts/articleCodeHighlighter";
 import {
   codeLanguagePickerOptions,
   formatCodeLanguageLabel,
@@ -400,6 +399,9 @@ const createCodeBlockFromHtml = (html: string) => {
 };
 
 const createHighlightedCodeBlock = async (code: string, languageId: string) => {
+  const { highlightArticleCode } = await import(
+    "@/scripts/articleCodeHighlighter"
+  );
   const nextBlock = createCodeBlockFromHtml(
     await highlightArticleCode(code, languageId)
   );
