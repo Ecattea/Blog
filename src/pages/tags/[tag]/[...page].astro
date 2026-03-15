@@ -33,10 +33,10 @@ const { page, tagName } = Astro.props;
     <div class="archive-container">
       <div class="archive-header font-ui">Tag</div>
       <h1 class="tag-title font-display">{tagName}</h1>
-      <div class="archive-subnav font-ui" aria-label="Secondary">
+      <nav class="archive-subnav font-ui" aria-label="Browse tag pages">
         <a href="/articles/">All Articles</a>
         <a href="/tags/">All Tags</a>
-      </div>
+      </nav>
 
       {page.data.map(post => <ArticleCard post={post} />)}
 

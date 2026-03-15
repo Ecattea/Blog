@@ -17,12 +17,14 @@ const { page } = Astro.props;
 <Layout title={`Articles | ${SITE.title}`} description={SITE.desc}>
   <section id="articles">
     <div class="archive-container">
-      <div class="archive-header font-ui">Archive</div>
-      <div class="archive-subnav font-ui" aria-label="Secondary">
+      <header class="page-header">
+        <h1 class="tag-title font-display">Articles</h1>
+      </header>
+      <nav class="archive-subnav font-ui" aria-label="Browse article sections">
         <a href="/tags/">Tags</a>
         <a href="/search/">Search</a>
         <a href="/archives/">Archives</a>
-      </div>
+      </nav>
 
       {page.data.map(post => <ArticleCard post={post} />)}
 

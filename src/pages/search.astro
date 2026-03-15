@@ -7,7 +7,9 @@ import { SITE } from "@/config";
 <Layout title={`Search | ${SITE.title}`}>
   <section id="articles">
     <div class="archive-container">
-      <div class="archive-header font-ui">Search</div>
+      <header class="page-header">
+        <h1 class="tag-title font-display">Search</h1>
+      </header>
       <div id="pagefind-search" transition:persist></div>
     </div>
   </section>
@@ -165,10 +167,10 @@ import { SITE } from "@/config";
     onIdle(async () => {
       if (import.meta.env.DEV) {
         pageFindSearch.innerHTML = `
-            <div style="margin-bottom: 1.5rem; padding: 1rem 1.25rem; border-radius: 12px; border: 1px solid var(--border-subtle); background: rgba(255,255,255,0.6);">
-              <p class="font-ui" style="color: var(--text-secondary);"><strong>DEV mode:</strong> Pagefind index is generated during build. Use preview to test search.</p>
-              <code style="display:block; margin-top:0.75rem;">pnpm run build</code>
-              <code style="display:block; margin-top:0.5rem;">pnpm run preview</code>
+            <div class="search-dev-note">
+              <p class="search-dev-note-copy font-ui"><strong>DEV mode:</strong> Pagefind index is generated during build. Use preview to test search.</p>
+              <code class="search-dev-note-command">pnpm run build</code>
+              <code class="search-dev-note-command">pnpm run preview</code>
             </div>
           `;
         return;
@@ -243,7 +245,7 @@ import { SITE } from "@/config";
     input {
       font-weight: 400;
       border: 1px solid var(--border-subtle);
-      background: rgba(255, 255, 255, 0.6);
+      background: var(--bg-card);
       backdrop-filter: blur(12px);
     }
 
@@ -268,10 +270,39 @@ import { SITE } from "@/config";
     }
 
     mark {
-      background: #87ceeb;
-      color: #0d2a3a;
+      background: color-mix(
+        in srgb,
+        var(--accent-color) 18%,
+        var(--color-bg-canvas) 82%
+      );
+      color: color-mix(
+        in srgb,
+        var(--text-primary) 88%,
+        var(--accent-color) 12%
+      );
       border-radius: 0.2em;
       padding: 0 0.12em;
+    }
+
+    .search-dev-note {
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      background: var(--bg-card);
+      padding: 1rem 1.25rem;
+    }
+
+    .search-dev-note-copy {
+      color: var(--text-secondary);
+    }
+
+    .search-dev-note-command {
+      display: block;
+      margin-top: 0.75rem;
+    }
+
+    .search-dev-note-command + .search-dev-note-command {
+      margin-top: 0.5rem;
     }
 
     .pagefind-ui__result:last-of-type {

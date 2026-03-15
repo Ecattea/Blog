@@ -18,7 +18,9 @@ const archiveGroups = await getArchiveGroups({
 <Layout title={`Archives | ${SITE.title}`}>
   <section id="articles">
     <div class="archive-container">
-      <div class="archive-header font-ui">Archives</div>
+      <header class="page-header">
+        <h1 class="tag-title font-display">Archives</h1>
+      </header>
       {
         archiveGroups.map(({ year, postCount, months }) => (
           <div class="archive-year">
