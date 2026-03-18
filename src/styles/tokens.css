@@ -1,4 +1,9 @@
 :root {
+  /* Font Family Tokens */
+  --font-family-ui: var(--font-ui-source);
+  --font-family-display: var(--font-display-source);
+  --font-family-body: var(--font-body-source);
+
   /* Semantic palette */
   --color-bg-canvas: #fafaf9;
   --color-bg-surface: rgba(255, 255, 255, 0.5);
@@ -132,14 +137,14 @@
 
 /* Utility Classes for Fonts */
 .font-ui {
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-family-ui);
 }
 
 .font-display {
-  font-family: "Playfair Display", serif;
+  font-family: var(--font-family-display);
   font-variant-numeric: lining-nums proportional-nums;
 }
 
 .font-body {
-  font-family: "Source Serif 4", serif;
+  font-family: var(--font-family-body);
 }

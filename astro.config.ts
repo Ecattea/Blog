@@ -1,4 +1,4 @@
-import { defineConfig, envField } from "astro/config";
+import { defineConfig, envField, fontProviders } from "astro/config";
 import { rehypeHeadingIds } from "@astrojs/markdown-remark";
 import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
@@ -57,5 +57,31 @@ export default defineConfig({
   },
   experimental: {
     preserveScriptOrder: true,
+    fonts: [
+      {
+        name: "Inter",
+        provider: fontProviders.google(),
+        cssVariable: "--font-ui-source",
+        fallbacks: ["sans-serif"],
+        weights: [400, 500],
+        styles: ["normal"],
+      },
+      {
+        name: "Source Serif 4",
+        provider: fontProviders.google(),
+        cssVariable: "--font-body-source",
+        fallbacks: ["serif"],
+        weights: [400, 600],
+        styles: ["normal", "italic"],
+      },
+      {
+        name: "Playfair Display",
+        provider: fontProviders.google(),
+        cssVariable: "--font-display-source",
+        fallbacks: ["serif"],
+        weights: [400, 600],
+        styles: ["normal", "italic"],
+      },
+    ],
   },
 });

@@ -1,8 +1,8 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
+import { Font } from "astro:assets";
 import { SITE } from "@/config";
-import { FONT_WARMUP_QUERIES, GOOGLE_FONTS_HREF } from "@/config/fonts";
 import "@/styles/global.css";
 import AmbientBackground from "@/components/AmbientBackground.astro";
 import DockNav from "@/components/DockNav.astro";
@@ -70,18 +70,9 @@ const structuredData = pubDatetime
     <meta name="generator" content={Astro.generator} />
 
     <!-- Fonts (UI / Display / Body) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="preload" href={GOOGLE_FONTS_HREF} as="style" />
-    <link rel="stylesheet" href={GOOGLE_FONTS_HREF} />
-    <script is:inline define:vars={{ FONT_WARMUP_QUERIES }}>
-      (() => {
-        if (!document.fonts?.load) return;
-        for (const query of FONT_WARMUP_QUERIES) {
-          void document.fonts.load(query);
-        }
-      })();
-    </script>
+    <Font cssVariable="--font-ui-source" preload />
+    <Font cssVariable="--font-body-source" preload />
+    <Font cssVariable="--font-display-source" />
 
     <!-- General Meta Tags -->
     <title>{title}</title>

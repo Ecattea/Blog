@@ -539,7 +539,7 @@
   padding: var(--post-outline-card-padding-top)
     var(--post-outline-card-padding-inline) 0.55rem;
   color: var(--post-outline-eyebrow-color);
-  font-family: "Source Serif 4", serif;
+  font-family: var(--font-family-body);
   font-size: var(--post-outline-eyebrow-size);
   font-style: italic;
   font-weight: var(--post-outline-eyebrow-weight);
@@ -645,7 +645,7 @@
   max-width: calc(100% - var(--post-code-language-max-width-offset));
   overflow: hidden;
   color: var(--post-code-language-color);
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-family-ui);
   font-size: var(--post-code-language-font-size);
   font-weight: 500;
   letter-spacing: var(--post-code-language-letter-spacing);

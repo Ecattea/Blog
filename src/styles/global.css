@@ -21,7 +21,7 @@ body {
 body {
   background-color: var(--color-bg-canvas);
   color: var(--color-text-primary);
-  font-family: "Source Serif 4", serif;
+  font-family: var(--font-family-body);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
 }
