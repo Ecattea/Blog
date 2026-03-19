@@ -3,7 +3,6 @@ import "@/styles/editorial-media.css";
 import { Image } from "astro:assets";
 import Layout from "@/layouts/Layout.astro";
 import { SITE } from "@/config";
-import { DISPLAY_FONT_NAMES } from "@/config/fonts";
 import { SOCIALS } from "@/constants";
 import aboutWorkspaceImage from "@/assets/images/about-workspace.jpg";
 ---
@@ -70,10 +69,6 @@ import aboutWorkspaceImage from "@/assets/images/about-workspace.jpg";
             <div class="about-meta-row">
               <dt>Built with</dt>
               <dd>Astro</dd>
-            </div>
-            <div class="about-meta-row">
-              <dt>Type set in</dt>
-              <dd>{DISPLAY_FONT_NAMES.join(" & ")}</dd>
             </div>
           </dl>
         </footer>

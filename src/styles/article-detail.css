@@ -41,6 +41,7 @@
   --post-fact-value-size: var(--type-meta-size);
   --post-fact-value-weight: var(--type-meta-weight);
   --post-fact-label-size: var(--type-label-compact-size);
+  --post-fact-label-letter-spacing: var(--type-label-compact-letter-spacing);
   --post-return-link-color: var(--text-primary);
   --post-return-link-hover-color: var(--accent-color);
   --post-tag-list-gap: 0.65rem;
@@ -62,11 +63,13 @@
   --post-outline-card-padding-bottom: 1rem;
   --post-outline-nav-gap: 0.4rem;
   --post-outline-link-line-height: var(--type-outline-line-height);
+  --post-outline-summary-icon-size: 1rem;
   --post-outline-card-bg: var(--color-bg-surface-elevated);
   --post-outline-card-blur: none;
   --post-outline-eyebrow-color: var(--text-tertiary);
   --post-outline-eyebrow-size: var(--type-outline-eyebrow-size);
   --post-outline-eyebrow-weight: var(--type-outline-eyebrow-weight);
+  --post-outline-eyebrow-letter-spacing: 0;
   --post-outline-hover-bg: rgba(28, 25, 23, 0.06);
   --post-outline-tail-space: 0.8rem;
   --post-outline-line-gap: 0.75rem;
@@ -108,11 +111,14 @@
   --post-code-copy-min-width: 4.75rem;
   --post-code-copy-padding-inline: 0.65rem;
   --post-code-copy-font-size: 0.72rem;
+  --post-code-copy-font-weight: 500;
   --post-code-copy-letter-spacing: 0.08em;
   --post-code-language-top: 0.96rem;
   --post-code-language-left: 1.22rem;
   --post-code-language-font-size: 0.74rem;
+  --post-code-language-font-weight: 500;
   --post-code-language-letter-spacing: 0.03em;
+  --post-code-language-line-height: 1.2;
   --post-code-language-max-width-offset: 9rem;
   --post-code-language-color: color-mix(
     in srgb,
@@ -163,6 +169,10 @@
   --post-code-picker-option-min-height: 2.1rem;
   --post-code-picker-option-padding-inline-start: 1.8rem;
   --post-code-picker-option-padding-inline-end: 0.82rem;
+  --post-code-option-label-size: 0.82rem;
+  --post-code-option-label-weight: 500;
+  --post-code-option-label-letter-spacing: 0.01em;
+  --post-code-option-label-line-height: 1.3;
   --post-code-picker-option-active-bg: rgba(28, 25, 23, 0.075);
   --post-code-picker-option-selected-bg: rgba(28, 25, 23, 0.075);
   --post-code-picker-option-selected-color: color-mix(
@@ -192,6 +202,10 @@
     var(--text-secondary) 22%,
     var(--post-paper-border) 78%
   );
+  --post-inline-code-font-size: 0.9em;
+  --post-code-content-font-size: 0.92rem;
+  --post-code-content-line-height: 1.68;
+  --post-quote-line-height: 1.7;
   --post-code-copy-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.86),
     0 8px 14px -16px rgba(49, 38, 25, 0.16);
@@ -318,7 +332,7 @@
   line-height: var(--type-label-compact-line-height);
   font-weight: var(--type-label-compact-weight);
   text-transform: uppercase;
-  letter-spacing: var(--type-label-compact-letter-spacing);
+  letter-spacing: var(--post-fact-label-letter-spacing);
 }
 
 .post-fact-value {
@@ -393,7 +407,7 @@
   content: "+";
   float: right;
   color: var(--text-secondary);
-  font-size: 1rem;
+  font-size: var(--post-outline-summary-icon-size);
   transition: transform 0.2s ease;
 }
 
@@ -543,7 +557,7 @@
   font-size: var(--post-outline-eyebrow-size);
   font-style: italic;
   font-weight: var(--post-outline-eyebrow-weight);
-  letter-spacing: 0;
+  letter-spacing: var(--post-outline-eyebrow-letter-spacing);
   text-transform: none;
 }
 
@@ -647,9 +661,9 @@
   color: var(--post-code-language-color);
   font-family: var(--font-family-ui);
   font-size: var(--post-code-language-font-size);
-  font-weight: 500;
+  font-weight: var(--post-code-language-font-weight);
   letter-spacing: var(--post-code-language-letter-spacing);
-  line-height: 1.2;
+  line-height: var(--post-code-language-line-height);
   text-overflow: ellipsis;
   white-space: nowrap;
   pointer-events: none;
@@ -684,9 +698,9 @@
   color: var(--post-code-language-color);
   font: inherit;
   font-size: var(--post-code-language-font-size);
-  font-weight: 500;
+  font-weight: var(--post-code-language-font-weight);
   letter-spacing: var(--post-code-language-letter-spacing);
-  line-height: 1.2;
+  line-height: var(--post-code-language-line-height);
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -842,10 +856,10 @@
 .article-code-language-option-label {
   display: block;
   min-width: 0;
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  line-height: 1.3;
+  font-size: var(--post-code-option-label-size);
+  font-weight: var(--post-code-option-label-weight);
+  letter-spacing: var(--post-code-option-label-letter-spacing);
+  line-height: var(--post-code-option-label-line-height);
 }
 
 .article-code-language-option:is(:hover, :focus-visible),
@@ -881,7 +895,7 @@
   box-shadow: var(--post-code-copy-shadow);
   color: var(--post-code-copy-color);
   font-size: var(--post-code-copy-font-size);
-  font-weight: 500;
+  font-weight: var(--post-code-copy-font-weight);
   letter-spacing: var(--post-code-copy-letter-spacing);
   text-transform: uppercase;
   cursor: pointer;
@@ -948,10 +962,8 @@
 }
 
 .post-content code {
-  font-family:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
-    "Courier New", monospace;
-  font-size: 0.9em;
+  font-family: var(--font-family-mono);
+  font-size: var(--post-inline-code-font-size);
   background: color-mix(in srgb, #fff 72%, var(--bg-canvas) 28%);
   border: 1px solid var(--border-subtle);
   border-radius: 7px;
@@ -988,8 +1000,8 @@
   border: 0;
   padding: 0;
   box-shadow: none;
-  font-size: 0.92rem;
-  line-height: 1.68;
+  font-size: var(--post-code-content-font-size);
+  line-height: var(--post-code-content-line-height);
 }
 
 .post-content .astro-code,
@@ -1009,7 +1021,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.76),
     0 12px 20px -30px rgba(49, 38, 25, 0.12);
   color: var(--post-quote-text);
-  line-height: 1.7;
+  line-height: var(--post-quote-line-height);
 }
 
 .post-content blockquote > * + * {
@@ -1086,6 +1098,7 @@
     --post-code-picker-option-min-height: 1.92rem;
     --post-code-picker-option-padding-inline-start: 1.55rem;
     --post-code-picker-option-padding-inline-end: 0.72rem;
+    --post-code-content-font-size: 0.84rem;
     --post-code-copy-bg: color-mix(in srgb, #fff 93%, var(--bg-canvas) 7%);
     --post-code-copy-border: color-mix(
       in srgb,
@@ -1148,11 +1161,6 @@
     text-transform: none;
   }
 
-  .post-content pre code,
-  .post-content .astro-code code {
-    font-size: 0.84rem;
-  }
-
   .post-content blockquote {
     padding: 0.88rem 0.95rem 0.88rem 1.05rem;
   }
@@ -1190,6 +1198,7 @@
     --post-fact-value-size: var(--type-meta-dense-size);
     --post-fact-value-weight: 470;
     --post-fact-label-size: var(--type-label-dense-size);
+    --post-fact-label-letter-spacing: 0.11em;
     --post-return-link-color: color-mix(
       in srgb,
       var(--text-secondary) 92%,
@@ -1223,10 +1232,6 @@
 
   .post-meta-panel {
     border-radius: 16px;
-  }
-
-  .post-fact-label {
-    letter-spacing: 0.11em;
   }
 
   .post-outline-desktop {

@@ -3,6 +3,7 @@ import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { Font } from "astro:assets";
 import { SITE } from "@/config";
+import { FONT_FAMILIES } from "@/config/fonts";
 import "@/styles/global.css";
 import AmbientBackground from "@/components/AmbientBackground.astro";
 import DockNav from "@/components/DockNav.astro";
@@ -69,10 +70,12 @@ const structuredData = pubDatetime
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Fonts (UI / Display / Body) -->
-    <Font cssVariable="--font-ui-source" preload />
-    <Font cssVariable="--font-body-source" preload />
-    <Font cssVariable="--font-display-source" />
+    <!-- Fonts (UI / Body / Display) -->
+    {
+      FONT_FAMILIES.map(({ cssVariable, preload }) => (
+        <Font cssVariable={cssVariable} preload={preload} />
+      ))
+    }
 
     <!-- General Meta Tags -->
     <title>{title}</title>

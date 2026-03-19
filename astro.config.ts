@@ -10,6 +10,7 @@ import {
 } from "@shikijs/transformers";
 
 import { SITE } from "./src/config";
+import { FONT_FAMILIES } from "./src/config/fonts";
 import { rehypeArticleCodeBlocks } from "./src/plugins/rehypeArticleCodeBlocks";
 import { codeLanguageShikiAliases } from "./src/utils/codeLanguage";
 
@@ -57,31 +58,13 @@ export default defineConfig({
   },
   experimental: {
     preserveScriptOrder: true,
-    fonts: [
-      {
-        name: "Inter",
-        provider: fontProviders.google(),
-        cssVariable: "--font-ui-source",
-        fallbacks: ["sans-serif"],
-        weights: [400, 500],
-        styles: ["normal"],
-      },
-      {
-        name: "Source Serif 4",
-        provider: fontProviders.google(),
-        cssVariable: "--font-body-source",
-        fallbacks: ["serif"],
-        weights: [400, 600],
-        styles: ["normal", "italic"],
-      },
-      {
-        name: "Playfair Display",
-        provider: fontProviders.google(),
-        cssVariable: "--font-display-source",
-        fallbacks: ["serif"],
-        weights: [400, 600],
-        styles: ["normal", "italic"],
-      },
-    ],
+    fonts: FONT_FAMILIES.map(font => ({
+      name: font.name,
+      provider: fontProviders.google(),
+      cssVariable: font.cssVariable,
+      fallbacks: [...font.fallbacks],
+      weights: [...font.weights],
+      styles: [...font.styles],
+    })),
   },
 });
