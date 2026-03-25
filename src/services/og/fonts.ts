@@ -1,11 +1,26 @@
-import type { Font, FontWeight } from "satori";
+import type { Font, FontStyle, FontWeight } from "satori";
+import type { FontRole } from "@/config/fonts";
+import { FONT_ROLE_FAMILY_NAMES, OG_FONT_ROLE_REQUESTS } from "@/config/fonts";
+
+type OgFontRequest = (typeof OG_FONT_ROLE_REQUESTS)[FontRole];
+
+function getGoogleFontApiUrl(
+  font: OgFontRequest,
+  text: string,
+  weight: FontWeight,
+  style: FontStyle
+) {
+  const axis = style === "italic" ? `ital,wght@1,${weight}` : `wght@${weight}`;
+  return `https://fonts.googleapis.com/css2?family=${encodeURIComponent(font.googleFamily)}:${axis}&text=${encodeURIComponent(text)}`;
+}
 
 async function loadGoogleFont(
-  font: string,
+  font: OgFontRequest,
   text: string,
-  weight: FontWeight
+  weight: FontWeight,
+  style: FontStyle
 ): Promise<ArrayBuffer> {
-  const API = `https://fonts.googleapis.com/css2?family=${font}:wght@${weight}&text=${encodeURIComponent(text)}`;
+  const API = getGoogleFontApiUrl(font, text, weight, style);
 
   const css = await (
     await fetch(API, {
@@ -31,30 +46,35 @@ async function loadGoogleFont(
   return res.arrayBuffer();
 }
 
-async function loadGoogleFonts(text: string): Promise<Font[]> {
-  const fontsConfig = [
-    {
-      name: "IBM Plex Mono",
-      font: "IBM+Plex+Mono",
-      weight: 400 as const,
-      style: "normal" as const,
-    },
-    {
-      name: "IBM Plex Mono",
-      font: "IBM+Plex+Mono",
-      weight: 700 as const,
-      style: "normal" as const,
-    },
-  ];
+export async function loadOgFonts(
+  text: string,
+  roles: readonly FontRole[]
+): Promise<Font[]> {
+  const fontVariants = new Map<
+    string,
+    { font: OgFontRequest; weight: FontWeight; style: FontStyle }
+  >();
 
-  const fonts = await Promise.all(
-    fontsConfig.map(async ({ name, font, weight, style }) => {
-      const data = await loadGoogleFont(font, text, weight);
-      return { name, data, weight, style };
+  roles.forEach(role => {
+    const font = OG_FONT_ROLE_REQUESTS[role];
+
+    font.weights.forEach(weight => {
+      font.styles.forEach(style => {
+        fontVariants.set(`${font.id}:${weight}:${style}`, {
+          font,
+          weight: weight as FontWeight,
+          style,
+        });
+      });
+    });
+  });
+
+  return Promise.all(
+    [...fontVariants.values()].map(async ({ font, weight, style }) => {
+      const data = await loadGoogleFont(font, text, weight, style);
+      return { name: font.name, data, weight, style };
     })
   );
-
-  return fonts;
 }
 
-export default loadGoogleFonts;
+export const OG_FONT_FAMILIES = FONT_ROLE_FAMILY_NAMES;

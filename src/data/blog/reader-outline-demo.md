@@ -10,7 +10,7 @@ tags:
 
 This sample article exists to validate the article outline experience in a way that a short welcome post cannot. It intentionally includes multiple `h2` and `h3` sections so the page-level TOC, anchor links, and jump offsets can all be exercised in one place.
 
-## Why outlines matter
+## *Why outlines matter*
 
 Long-form pages ask readers to keep more context in their head. A lightweight outline helps them see the shape of the article before they commit to reading every paragraph.
 

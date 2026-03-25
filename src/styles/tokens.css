@@ -1,8 +1,5 @@
 :root {
-  /* Font Family Tokens */
-  --font-family-ui: var(--font-ui-source);
-  --font-family-display: var(--font-display-source);
-  --font-family-body: var(--font-body-source);
+  /* Local-only font stacks */
   --font-family-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
@@ -49,10 +46,10 @@
   --type-display-feature-line-height: 1.1;
   --type-display-feature-weight: 400;
 
-  --type-display-page-size: clamp(2.8rem, 5vw, 4.2rem);
-  --type-display-page-line-height: 1.05;
-  --type-display-page-letter-spacing: -0.02em;
-  --type-display-page-weight: 600;
+  --type-display-page-size: clamp(2.55rem, 4.4vw, 3.85rem);
+  --type-display-page-line-height: 1.08;
+  --type-display-page-letter-spacing: -0.018em;
+  --type-display-page-weight: 560;
 
   --type-title-card-size: 2.5rem;
   --type-title-card-line-height: 1.1;
@@ -70,8 +67,8 @@
   --type-title-supporting-line-height: 1.15;
   --type-title-supporting-weight: 500;
 
-  --type-body-reading-size: 1.18rem;
-  --type-body-reading-line-height: 1.82;
+  --type-body-reading-size: 1.16rem;
+  --type-body-reading-line-height: 1.84;
 
   --type-body-large-size: 1.24rem;
   --type-body-large-line-height: 1.72;
@@ -112,19 +109,19 @@
   --type-outline-eyebrow-size: 0.8125rem;
   --type-outline-eyebrow-weight: 400;
 
-  --type-reading-h2-size: 1.9rem;
-  --type-reading-h2-line-height: 1.16;
-  --type-reading-h2-letter-spacing: -0.02em;
-  --type-reading-h2-weight: 600;
+  --type-reading-h2-size: 1.78rem;
+  --type-reading-h2-line-height: 1.22;
+  --type-reading-h2-letter-spacing: -0.015em;
+  --type-reading-h2-weight: 520;
 
-  --type-reading-h3-size: 1.42rem;
-  --type-reading-h3-line-height: 1.16;
-  --type-reading-h3-weight: 600;
+  --type-reading-h3-size: 1.3rem;
+  --type-reading-h3-line-height: 1.22;
+  --type-reading-h3-weight: 560;
 
-  --type-reading-h4-size: 1.08rem;
-  --type-reading-h4-line-height: 1.16;
-  --type-reading-h4-letter-spacing: 0.04em;
-  --type-reading-h4-weight: 600;
+  --type-reading-h4-size: 1rem;
+  --type-reading-h4-line-height: 1.28;
+  --type-reading-h4-letter-spacing: 0.02em;
+  --type-reading-h4-weight: 560;
 
   /* Transitions */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -136,15 +133,15 @@
     --type-display-hero-size: 15vw;
     --type-title-card-size: 1.8rem;
     --type-title-card-line-height: 1.15;
-    --type-body-reading-size: 1.08rem;
-    --type-body-reading-line-height: 1.86;
+    --type-body-reading-size: 1.06rem;
+    --type-body-reading-line-height: 1.88;
     --type-body-large-size: 1.12rem;
     --type-body-large-line-height: 1.74;
     --type-body-supporting-size: 1.02rem;
     --type-body-supporting-line-height: 1.7;
-    --type-reading-h2-size: 1.72rem;
-    --type-reading-h3-size: 1.28rem;
-    --type-reading-h4-size: 0.98rem;
+    --type-reading-h2-size: 1.58rem;
+    --type-reading-h3-size: 1.22rem;
+    --type-reading-h4-size: 0.96rem;
     --type-caption-size: 0.83rem;
   }
 }
@@ -154,9 +151,9 @@
   font-family: var(--font-family-ui);
 }
 
-.font-display {
-  /* Current display headings rely on these numeral forms; revisit if the face changes. */
-  font-family: var(--font-family-display);
+.font-heading {
+  /* Heading styles rely on these numeral forms; revisit if the face changes. */
+  font-family: var(--font-family-heading);
   font-variant-numeric: lining-nums proportional-nums;
 }
 

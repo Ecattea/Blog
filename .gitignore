@@ -1,6 +1,10 @@
 # build output
 dist/
 
+# local brainstorming and design artifacts
+.superpowers/
+docs/
+
 # generated types
 .astro/
 .cache/

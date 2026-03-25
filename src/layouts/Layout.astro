@@ -3,7 +3,10 @@ import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { Font } from "astro:assets";
 import { SITE } from "@/config";
-import { FONT_FAMILIES } from "@/config/fonts";
+import {
+  LAYOUT_FONT_INJECTIONS,
+  LAYOUT_FONT_ROLE_DECLARATIONS,
+} from "@/config/fonts";
 import "@/styles/global.css";
 import AmbientBackground from "@/components/AmbientBackground.astro";
 import DockNav from "@/components/DockNav.astro";
@@ -33,6 +36,10 @@ const {
 } = Astro.props;
 
 const socialImageURL = new URL(ogImage, Astro.url);
+const semanticFontRoleCss = `:root {\n${LAYOUT_FONT_ROLE_DECLARATIONS.map(
+  ({ cssVariable, sourceCssVariable }) =>
+    `  ${cssVariable}: var(${sourceCssVariable});`
+).join("\n")}\n}`;
 
 const structuredData = pubDatetime
   ? {
@@ -70,12 +77,13 @@ const structuredData = pubDatetime
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
-    <!-- Fonts (UI / Body / Display) -->
+    <!-- Managed font sources -->
     {
-      FONT_FAMILIES.map(({ cssVariable, preload }) => (
+      LAYOUT_FONT_INJECTIONS.map(({ cssVariable, preload }) => (
         <Font cssVariable={cssVariable} preload={preload} />
       ))
     }
+    <style is:inline set:html={semanticFontRoleCss}></style>
 
     <!-- General Meta Tags -->
     <title>{title}</title>

@@ -1,7 +1,7 @@
 import satori from "satori";
 import type { CollectionEntry } from "astro:content";
 import { SITE } from "@/config";
-import loadGoogleFonts from "../fonts";
+import { loadOgFonts, OG_FONT_FAMILIES } from "../fonts";
 
 export default async (post: CollectionEntry<"blog">) => {
   return satori(
@@ -66,7 +66,8 @@ export default async (post: CollectionEntry<"blog">) => {
                       props: {
                         style: {
                           fontSize: 72,
-                          fontWeight: "bold",
+                          fontFamily: OG_FONT_FAMILIES.heading,
+                          fontWeight: 600,
                           maxHeight: "84%",
                           overflow: "hidden",
                         },
@@ -81,6 +82,7 @@ export default async (post: CollectionEntry<"blog">) => {
                           justifyContent: "space-between",
                           width: "100%",
                           marginBottom: "8px",
+                          fontFamily: OG_FONT_FAMILIES.ui,
                           fontSize: 28,
                         },
                         children: [
@@ -100,8 +102,9 @@ export default async (post: CollectionEntry<"blog">) => {
                                   type: "span",
                                   props: {
                                     style: {
+                                      fontFamily: OG_FONT_FAMILIES.ui,
                                       overflow: "hidden",
-                                      fontWeight: "bold",
+                                      fontWeight: 600,
                                     },
                                     children: post.data.author,
                                   },
@@ -112,7 +115,11 @@ export default async (post: CollectionEntry<"blog">) => {
                           {
                             type: "span",
                             props: {
-                              style: { overflow: "hidden", fontWeight: "bold" },
+                              style: {
+                                fontFamily: OG_FONT_FAMILIES.ui,
+                                overflow: "hidden",
+                                fontWeight: 600,
+                              },
                               children: SITE.title,
                             },
                           },
@@ -131,8 +138,9 @@ export default async (post: CollectionEntry<"blog">) => {
       width: 1200,
       height: 630,
       embedFont: true,
-      fonts: await loadGoogleFonts(
-        post.data.title + post.data.author + SITE.title + "by"
+      fonts: await loadOgFonts(
+        post.data.title + post.data.author + SITE.title + "by",
+        ["heading", "ui"]
       ),
     }
   );

@@ -10,9 +10,20 @@ import {
 } from "@shikijs/transformers";
 
 import { SITE } from "./src/config";
-import { FONT_FAMILIES } from "./src/config/fonts";
+import {
+  ASTRO_FONT_REGISTRATIONS,
+  type FontProviderName,
+  resolveFontProviderName,
+} from "./src/config/fonts";
 import { rehypeArticleCodeBlocks } from "./src/plugins/rehypeArticleCodeBlocks";
 import { codeLanguageShikiAliases } from "./src/utils/codeLanguage";
+
+function getAstroFontProvider(provider: FontProviderName) {
+  switch (resolveFontProviderName(provider)) {
+    case "google":
+      return fontProviders.google();
+  }
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -58,9 +69,9 @@ export default defineConfig({
   },
   experimental: {
     preserveScriptOrder: true,
-    fonts: FONT_FAMILIES.map(font => ({
+    fonts: ASTRO_FONT_REGISTRATIONS.map(font => ({
       name: font.name,
-      provider: fontProviders.google(),
+      provider: getAstroFontProvider(font.provider),
       cssVariable: font.cssVariable,
       fallbacks: [...font.fallbacks],
       weights: [...font.weights],

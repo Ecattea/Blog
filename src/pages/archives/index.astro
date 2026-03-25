@@ -19,12 +19,12 @@ const archiveGroups = await getArchiveGroups({
   <section id="articles">
     <div class="archive-container">
       <header class="page-header">
-        <h1 class="tag-title font-display">Archives</h1>
+        <h1 class="tag-title font-heading">Archives</h1>
       </header>
       {
         archiveGroups.map(({ year, postCount, months }) => (
           <div class="archive-year">
-            <div class="archive-year-title font-display">
+            <div class="archive-year-title font-heading">
               {year} <sup class="archive-count font-ui">{postCount}</sup>
             </div>
             {months.map(monthGroup => (

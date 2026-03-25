@@ -22,7 +22,7 @@ const latestDateLabel = latestPost
   <section id="home">
     <div class="container-wide">
       <div class="hero-header">
-        <h1 class="hero-title font-display">
+        <h1 class="hero-title font-heading">
           {SITE.author}
           <br />
           <span class="hero-title-subline">
@@ -38,7 +38,7 @@ const latestDateLabel = latestPost
           <span class="hero-card-label font-ui">
             {latestPost ? `Latest Entry — ${latestDateLabel}` : "Latest Entry"}
           </span>
-          <h3 class="hero-card-title font-display">
+          <h3 class="hero-card-title font-heading">
             {latestPost ? `"${latestPost.data.title}"` : "No posts yet."}
           </h3>
           <div class="hero-card-cta font-ui">
