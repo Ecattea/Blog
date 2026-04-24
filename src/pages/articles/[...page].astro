@@ -23,7 +23,7 @@ const { page } = Astro.props;
       <nav class="archive-subnav font-ui" aria-label="Browse article sections">
         <a href="/tags/">Tags</a>
         <a href="/search/">Search</a>
-        <a href="/archives/">Archives</a>
+        {SITE.showArchives && <a href="/archives/">Archives</a>}
       </nav>
 
       {page.data.map(post => <ArticleCard post={post} />)}

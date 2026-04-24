@@ -99,34 +99,49 @@ import { SITE } from "@/config";
       });
     }
 
+    const observerOptions = {
+      childList: true,
+      subtree: true,
+    };
+    let highlightObserver: MutationObserver | null = null;
+    let isApplyingHighlights = false;
+
     function applyCustomHighlights(rawTerm: string) {
       const matcher = buildMatcher(rawTerm);
 
-      const links = searchRoot.querySelectorAll<HTMLAnchorElement>(
-        ".pagefind-ui__result-title .pagefind-ui__result-link"
-      );
+      highlightObserver?.disconnect();
+      isApplyingHighlights = true;
 
-      links.forEach(link => {
-        if (!link.dataset.pagefindRawText) {
-          link.dataset.pagefindRawText = link.textContent ?? "";
-        }
+      try {
+        const links = searchRoot.querySelectorAll<HTMLAnchorElement>(
+          ".pagefind-ui__result-title .pagefind-ui__result-link"
+        );
 
-        link.textContent = link.dataset.pagefindRawText;
-        highlightTextNodes(link, matcher);
-      });
+        links.forEach(link => {
+          if (!link.dataset.pagefindRawText) {
+            link.dataset.pagefindRawText = link.textContent ?? "";
+          }
 
-      const excerpts = searchRoot.querySelectorAll<HTMLElement>(
-        ".pagefind-ui__result-excerpt"
-      );
+          link.textContent = link.dataset.pagefindRawText;
+          highlightTextNodes(link, matcher);
+        });
 
-      excerpts.forEach(excerpt => {
-        if (!excerpt.dataset.pagefindRawHtml) {
-          excerpt.dataset.pagefindRawHtml = stripMarkTags(excerpt.innerHTML);
-        }
+        const excerpts = searchRoot.querySelectorAll<HTMLElement>(
+          ".pagefind-ui__result-excerpt"
+        );
 
-        excerpt.innerHTML = excerpt.dataset.pagefindRawHtml;
-        highlightTextNodes(excerpt, matcher);
-      });
+        excerpts.forEach(excerpt => {
+          if (!excerpt.dataset.pagefindRawHtml) {
+            excerpt.dataset.pagefindRawHtml = stripMarkTags(excerpt.innerHTML);
+          }
+
+          excerpt.innerHTML = excerpt.dataset.pagefindRawHtml;
+          highlightTextNodes(excerpt, matcher);
+        });
+      } finally {
+        isApplyingHighlights = false;
+        highlightObserver?.observe(searchRoot, observerOptions);
+      }
     }
 
     let pendingHighlight = false;
@@ -145,14 +160,12 @@ import { SITE } from "@/config";
     if (searchRoot.dataset.searchHighlightBound !== "1") {
       searchRoot.dataset.searchHighlightBound = "1";
 
-      const observer = new MutationObserver(() => {
+      highlightObserver = new MutationObserver(() => {
+        if (isApplyingHighlights) return;
         scheduleHighlight(getCurrentTerm());
       });
 
-      observer.observe(searchRoot, {
-        childList: true,
-        subtree: true,
-      });
+      highlightObserver.observe(searchRoot, observerOptions);
 
       document.addEventListener("input", event => {
         const target = event.target;

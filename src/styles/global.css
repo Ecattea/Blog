@@ -99,7 +99,7 @@ a {
   }
 }
 
-/* --- Ambient background animation --- */
+/* --- Ambient background --- */
 .ambient-layer {
   position: fixed;
   top: 0;
@@ -108,55 +108,15 @@ a {
   height: 100%;
   z-index: -1;
   overflow: hidden;
-  background: var(--bg-canvas);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, #fff 42%, var(--bg-canvas) 58%) 0%,
+      var(--bg-canvas) 34%,
+      color-mix(in srgb, #fff 18%, var(--bg-canvas) 82%) 100%
+    ),
+    var(--bg-canvas);
   pointer-events: none;
-}
-
-.orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.5;
-  animation: float-orb 25s infinite ease-in-out;
-}
-
-.orb-1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(
-    circle,
-    rgba(230, 230, 250, 0.6) 0%,
-    rgba(250, 250, 249, 0) 70%
-  );
-  top: -200px;
-  left: -150px;
-}
-
-.orb-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(
-    circle,
-    rgba(255, 240, 230, 0.6) 0%,
-    rgba(250, 250, 249, 0) 70%
-  );
-  bottom: -150px;
-  right: -100px;
-  animation-delay: -5s;
-}
-
-@keyframes float-orb {
-  0% {
-    transform: translate(0, 0);
-  }
-
-  50% {
-    transform: translate(40px, -50px);
-  }
-
-  100% {
-    transform: translate(0, 0);
-  }
 }
 
 /* --- Layout structure --- */
@@ -851,10 +811,6 @@ h1.hero-title {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
-  }
-
-  .orb {
-    animation: none;
   }
 
   .hero-card,
