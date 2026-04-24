@@ -138,10 +138,7 @@ export default async (post: CollectionEntry<"blog">) => {
       width: 1200,
       height: 630,
       embedFont: true,
-      fonts: await loadOgFonts(
-        post.data.title + post.data.author + SITE.title + "by",
-        ["heading", "ui"]
-      ),
+      fonts: await loadOgFonts(["heading", "ui"]),
     }
   );
 };

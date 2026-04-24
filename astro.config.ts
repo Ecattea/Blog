@@ -50,6 +50,9 @@ export default defineConfig({
     },
   },
   vite: {
+    build: {
+      chunkSizeWarningLimit: 800,
+    },
     optimizeDeps: {
       exclude: ["@resvg/resvg-js"],
     },
